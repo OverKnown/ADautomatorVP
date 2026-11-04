@@ -41,11 +41,16 @@ type Layer = keyof typeof layerColours;
 const layer = () => dropdown("LAYER", Object.keys(layerColours));
 Blockly.Extensions.register("layer_colour", function () {
   const field = this.getField("LAYER")!;
-  field.setValidator((value: string) => {
+  const update = (value: string) => {
     this.setColour(layerColours[value as Layer]);
+    if (this.type === "prestige") {
+      this.getField("RESPEC")!.setVisible(value !== "INFINITY");
+      this.getField("RESPEC_LABEL")!.setVisible(value !== "INFINITY");
+    }
     return value;
-  });
-  this.setColour(layerColours[field.getValue() as Layer]);
+  };
+  field.setValidator(update);
+  update(field.getValue());
 });
 const condition = () => [
   dropdown("RESOURCE", currencies),
@@ -123,8 +128,12 @@ const definitions = [
     type: "prestige",
     message0: "Сброс  %1",
     args0: [layer()],
-    message1: "не ждать %1  respec %2",
-    args1: [checkbox("NOWAIT"), checkbox("RESPEC")],
+    message1: "не ждать %1  %2 %3",
+    args1: [
+      checkbox("NOWAIT"),
+      { type: "field_label", name: "RESPEC_LABEL", text: "respec" },
+      checkbox("RESPEC"),
+    ],
     colour: layerColours.INFINITY,
     extensions: ["layer_colour"],
     tooltip:
@@ -287,6 +296,8 @@ export function blockToCommand(block: BlocklyTypes.Block): Command {
   for (const input of block.inputList)
     for (const field of input.fieldRow)
       if (field.name) fields[field.name] = String(field.getValue());
+  if (block.type === "prestige" && fields.LAYER === "INFINITY")
+    fields.RESPEC = "FALSE";
   const children: Command[] = [];
   for (
     let child = block.getInputTargetBlock("BODY");
