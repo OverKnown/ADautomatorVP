@@ -30,6 +30,7 @@ export const types = [
   "while",
   "until",
   "auto",
+  "auto_amount",
   "pause",
   "prestige",
   "studies",
@@ -109,9 +110,12 @@ export function compile(commands: Command[]): Compilation {
         node.children?.forEach((child) => visit(child, depth + 1));
         emit("}");
         break;
-      case "auto": {
+      case "auto":
+      case "auto_amount": {
         const layer = enumValue("LAYER", ["INFINITY", "ETERNITY", "REALITY"]);
-        const mode = enumValue("MODE", ["ON", "OFF", "AMOUNT"]);
+        const mode = node.type === "auto_amount"
+          ? "AMOUNT"
+          : enumValue("MODE", ["ON", "OFF", "AMOUNT"]);
         const unit: Record<string, string> = {
           INFINITY: "IP",
           ETERNITY: "EP",

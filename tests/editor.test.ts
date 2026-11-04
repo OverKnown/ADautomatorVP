@@ -117,6 +117,48 @@ test("currency auto modes choose the resource for their prestige layer", () => {
   );
   assert.deepEqual(result.issues, []);
 });
+test("dedicated amount blocks select the currency for each layer", () => {
+  const result = compile(
+    ["INFINITY", "ETERNITY", "REALITY"].map((LAYER) =>
+      command("auto_amount", { LAYER, VALUE: "1e1000" }),
+    ),
+  );
+  assert.equal(result.code,
+    "AUTO INFINITY 1e1000 IP\nAUTO ETERNITY 1e1000 EP\nAUTO REALITY 1e1000 RM");
+  assert.deepEqual(result.issues, []);
+  assert.ok(compile([command("auto_amount", { LAYER: "REALITY", VALUE: "bad" })])
+    .issues.some((issue) => issue.severity === "error"));
+});
+test("old auto blocks import into compact blocks without changing code", () => {
+  const data = example("empty") as any;
+  data.workspace.blocks.blocks[0].next = {
+    block: {
+      type: "auto", fields: { LAYER: "INFINITY", MODE: "ON", VALUE: "1e10" },
+      next: { block: {
+        type: "auto", fields: { LAYER: "ETERNITY", MODE: "AMOUNT", VALUE: "1e1000" },
+        next: { block: {
+          type: "auto", fields: { LAYER: "REALITY", MODE: "OFF", VALUE: "5" },
+        } },
+      } },
+    },
+  };
+  const workspace = new Blockly.Workspace();
+  try {
+    const parsed = parseProject(JSON.stringify(data));
+    Blockly.serialization.workspaces.load(parsed.workspace, workspace);
+    const result = compileWorkspace(workspace);
+    assert.equal(result.code, "AUTO INFINITY ON\nAUTO ETERNITY 1e1000 EP\nAUTO REALITY OFF");
+    assert.deepEqual(result.issues, []);
+    const auto = workspace.getAllBlocks(false).find((block) => block.type === "auto")!;
+    assert.equal(auto.getField("VALUE"), null);
+    assert.ok(workspace.getAllBlocks(false).some((block) => block.type === "auto_amount"));
+    const saved = parseProject(JSON.stringify(makeProject("Тест", workspace)));
+    Blockly.serialization.workspaces.load(saved.workspace, workspace);
+    assert.equal(compileWorkspace(workspace).code, result.code);
+  } finally {
+    workspace.dispose();
+  }
+});
 test("NOWAIT is placed before PURCHASE, LOAD, and RESPEC", () => {
   assert.equal(
     compile([

@@ -83,6 +83,15 @@ export function parseProject(source: string): Project {
         out.fields[key] = field;
       }
     }
+    // Upgrade the original combined auto block without changing generated commands.
+    if (out.type === "auto" && out.fields) {
+      if (out.fields.MODE === "AMOUNT") {
+        out.type = "auto_amount";
+        delete out.fields.MODE;
+      } else if (["ON", "OFF"].includes(out.fields.MODE)) {
+        delete out.fields.VALUE;
+      }
+    }
     if (value.next !== undefined) {
       if (!record(value.next) || !record(value.next.block))
         throw new Error("Повреждена цепочка блоков.");
@@ -179,7 +188,7 @@ export function example(key: string): Project {
       block("comment", {
         TEXT: "Пример: дождаться награды и выполнить Eternity",
       }),
-      block("auto", { LAYER: "INFINITY", MODE: "ON", VALUE: "1e10" }),
+      block("auto", { LAYER: "INFINITY", MODE: "ON" }),
       block("wait", { RESOURCE: "PENDING EP", OP: ">=", VALUE: "1e100" }),
       block("prestige", {
         LAYER: "ETERNITY",

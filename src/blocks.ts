@@ -89,15 +89,21 @@ const definitions = [
       dropdown("MODE", [
         ["включить", "ON"],
         ["выключить", "OFF"],
-        ["по количеству", "AMOUNT"],
       ]),
     ],
-    message1: "порог (для «по количеству») %1",
-    args1: [text("VALUE", "1e10")],
     colour: layerColours.INFINITY,
     extensions: ["layer_colour"],
     tooltip:
-      "AUTO. Ресурс порога зависит от слоя: IP, EP или RM. ON/OFF не меняет текущий порог.",
+      "AUTO ON/OFF. Включить или выключить автосброс, не меняя текущий порог.",
+  },
+  {
+    type: "auto_amount",
+    message0: "Автосброс  %1  по количеству %2",
+    args0: [layer(), text("VALUE", "1e10")],
+    colour: layerColours.INFINITY,
+    extensions: ["layer_colour"],
+    tooltip:
+      "AUTO по количеству. Ресурс порога зависит от слоя: IP, EP или RM.",
   },
   {
     type: "pause",
@@ -256,25 +262,14 @@ const category = (name: string, colour: string, blocks: string[]) => ({
   colour,
   contents: blocks.map((type) => ({ kind: "block", type })),
 });
-const layerCategory = (name: string, layer: Layer, blocks: string[]) => ({
-  ...category(name, layerColours[layer], blocks),
-  contents: [
-    ...["auto", "prestige"].map((type) => ({
-      kind: "block",
-      type,
-      fields: { LAYER: layer },
-    })),
-    ...blocks.map((type) => ({ kind: "block", type })),
-  ],
-});
 export const toolbox = {
   kind: "categoryToolbox",
   contents: [
     category("Ожидание, условия и циклы", "#5d6c9c", [
       "wait", "pause", "if", "while", "until",
     ]),
-    layerCategory("Infinity", "INFINITY", []),
-    layerCategory("Eternity", "ETERNITY", [
+    category("Сбросы", "#46766b", ["prestige", "auto", "auto_amount"]),
+    category("Eternity", layerColours.ETERNITY, [
       "studies",
       "load",
       "study_respec",
@@ -282,7 +277,7 @@ export const toolbox = {
       "start_ec",
       "dilation",
     ]),
-    layerCategory("Reality", "REALITY", ["bh"]),
+    category("Reality", layerColours.REALITY, ["bh"]),
     category("Другое", "#747782", ["comment", "notify", "raw", "stop"]),
   ],
 };
