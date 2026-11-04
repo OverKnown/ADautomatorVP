@@ -475,9 +475,7 @@ footer a {
   font-family: "Manrope Variable", system-ui, sans-serif !important;
 }
 /* Keep workspace panning enabled while hiding its scrollbar controls. */
-.blocklySvg > .blocklyScrollbarHorizontal,
-.blocklySvg > .blocklyScrollbarVertical,
-.blocklySvg > .blocklyBubbleCanvas > .blocklyScrollbarBackground {
+.blocklyMainWorkspaceScrollbar {
   visibility: hidden;
 }
 .blocklyScrollbarHandle {
