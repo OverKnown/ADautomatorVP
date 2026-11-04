@@ -14,13 +14,13 @@
   <body>
     <header class="app-header">
       <div class="brand-group">
-      <a class="brand" href="./" aria-label="Automator Studio"
-        ><span class="brand-icon">a<span>∞</span></span
-        ><span>automator<span class="brand-light"> / studio</span></span
-        ><span class="version">v0.1</span></a
-      >
-      <div class="eyebrow">ВИЗУАЛЬНЫЙ РЕДАКТОР СКРИПТОВ</div>
-      <span class="game-label">ANTIMATTER DIMENSIONS</span>
+        <a class="brand" href="./" aria-label="Automator Studio"
+          ><span class="brand-icon">a<span>∞</span></span
+          ><span>automator<span class="brand-light"> / studio</span></span
+          ><span class="version">v0.1</span></a
+        >
+        <div class="eyebrow">ВИЗУАЛЬНЫЙ РЕДАКТОР СКРИПТОВ</div>
+        <span class="game-label">ANTIMATTER DIMENSIONS</span>
       </div>
       <section class="project-bar" aria-label="Проект">
         <div>
@@ -38,12 +38,13 @@
         </div>
         <div class="project-actions">
           <button id="new-project" class="quiet">＋ Новый</button
-          ><button id="open-project">Открыть JSON</button
+          ><button id="paste-code">Вставить код</button
+          ><button id="open-project">Открыть TXT / JSON</button
           ><button id="save-project">↓ Сохранить проект</button
           ><input
             type="file"
             id="file-input"
-            accept=".json,application/json"
+            accept=".txt,.json,text/plain,application/json"
             hidden
           />
         </div>
@@ -165,6 +166,27 @@
           ><span>→</span>
         </button>
       </div>
+    </dialog>
+    <dialog id="import-dialog">
+      <div class="dialog-head">
+        <h2>Код → блоки</h2>
+        <button data-close aria-label="Закрыть">✕</button>
+      </div>
+      <p>
+        Вставь текст Automator. Поддерживаемые команды станут блоками,
+        неизвестные строки — блоками «Свой код» с предупреждением. Расположение
+        блоков будет построено заново.
+      </p>
+      <label for="import-source">Текст скрипта</label>
+      <textarea
+        id="import-source"
+        rows="12"
+        spellcheck="false"
+        maxlength="2000000"
+        placeholder="WAIT EP >= 1e100"
+      ></textarea>
+      <p id="import-error" role="alert"></p>
+      <button id="import-submit" class="primary">Преобразовать в блоки</button>
     </dialog>
     <script type="module" src="/src/main.ts"></script>
   </body>
