@@ -20,9 +20,6 @@
       <span class="game-label"
         >ANTIMATTER DIMENSIONS <span class="version">v0.1</span></span
       >
-      <button id="help" class="quiet">
-        Как это работает <span aria-hidden="true">↗</span>
-      </button>
     </header>
     <main>
       <section class="project-bar" aria-label="Проект">
@@ -80,22 +77,16 @@
               </button>
             </div>
           </div>
-          <div class="workspace-hint">
-            <span>01 <b>Выбери блок</b></span
-            ><span>02 <b>Соедини команды</b></span
-            ><span>03 <b>Скопируй код в игру</b></span>
-          </div>
           <div id="blockly" aria-label="Рабочая область блоков"></div>
           <div class="workspace-bottom">
-            <span>Перетащи блок из категории в цепочку</span
-            ><button id="fit" class="quiet">⌖ Показать всё</button>
+            <button id="fit" class="quiet">⌖ Показать всё</button>
           </div>
         </div>
         <aside class="code-panel" aria-label="Сгенерированный код">
           <div class="panel-toolbar">
             <span class="panel-title"
               ><span class="code-symbol">&lt;/&gt;</span> Код Automator</span
-            ><span class="live-label">LIVE</span>
+            >
           </div>
           <div class="code-file">
             <span>script.txt</span><span id="line-count">0 строк</span>
@@ -128,21 +119,10 @@
               исследований зависит от сохранения в игре.
             </p>
           </div>
-          <div class="local-note">
-            <span aria-hidden="true">◈</span>
-            <div>
-              <strong>Твой скрипт — на твоём устройстве</strong>
-              <p>
-                Автосохранение в браузере. Скачивай JSON, чтобы сохранить копию
-                или перенести проект.
-              </p>
-            </div>
-          </div>
         </aside>
       </section>
       <footer>
-        <span>Сначала блоки. Потом бесконечность.</span
-        ><a
+        <a
           href="https://ivark.github.io/AntimatterDimensions/"
           target="_blank"
           rel="noreferrer"
@@ -184,46 +164,6 @@
           ><span>→</span>
         </button>
       </div>
-    </dialog>
-    <dialog id="help-dialog">
-      <div class="dialog-head">
-        <h2>От блоков к Automator</h2>
-        <button data-close aria-label="Закрыть">✕</button>
-      </div>
-      <ol class="help-steps">
-        <li>
-          Открой категорию слева и перетащи команду под блок «Начало скрипта».
-          Все команды должны быть соединены.
-        </li>
-        <li>
-          Измени параметры прямо на блоках. В условия и циклы можно вкладывать
-          другие команды. Правой кнопкой можно дублировать или удалить блок.
-        </li>
-        <li>
-          Исправь ошибки справа. Нажатие на сообщение показывает проблемный
-          блок. «Свой код» вставляет одну непроверенную строку.
-        </li>
-        <li>
-          Нажми «Копировать код», открой Automator в игре, переключись в
-          текстовый редактор и вставь код. Конструктор не запускает игру и не
-          читает её сохранение.
-        </li>
-        <li>
-          Сохрани JSON проекта для резервной копии. TXT содержит только код для
-          игры и не импортируется обратно в блоки.
-        </li>
-      </ol>
-      <p class="help-note">
-        Automator и часть команд открываются по мере прохождения. Очистка данных
-        сайта удалит автосохранение. Проекты между устройствами не
-        синхронизируются.
-      </p>
-      <a
-        href="https://github.com/IvarK/AntimatterDimensionsSourceCode/tree/master/src/core/automator"
-        target="_blank"
-        rel="noreferrer"
-        >Синтаксис: исходный код Automator ↗</a
-      >
     </dialog>
     <script type="module" src="/src/main.ts"></script>
   </body>

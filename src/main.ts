@@ -276,10 +276,9 @@ el<HTMLInputElement>("file-input").addEventListener("change", async (event) => {
     input.value = "";
   }
 });
-for (const key of ["examples", "help"])
-  el(key).addEventListener("click", () =>
-    el<HTMLDialogElement>(`${key}-dialog`).showModal(),
-  );
+el("examples").addEventListener("click", () =>
+  el<HTMLDialogElement>("examples-dialog").showModal(),
+);
 document
   .querySelectorAll<HTMLButtonElement>("[data-close]")
   .forEach((button) =>

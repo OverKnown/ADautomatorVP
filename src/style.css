@@ -126,11 +126,6 @@ a:hover {
   color: #8a7ca7;
   margin-left: 8px;
 }
-.app-header > .quiet {
-  margin-left: auto;
-  color: #77747e;
-  font-size: 12px;
-}
 main {
   max-width: 1920px;
   margin: auto;
@@ -265,29 +260,6 @@ main {
   border-left: 1px solid var(--border);
   margin: 0 9px;
 }
-.workspace-hint {
-  height: 39px;
-  min-height: 39px;
-  display: flex;
-  gap: 28px;
-  align-items: center;
-  padding: 0 20px;
-  background: #fbfafc;
-  border-bottom: 1px solid var(--border);
-  font:
-    10px "IBM Plex Mono",
-    monospace;
-  color: #ada6bb;
-}
-.workspace-hint b {
-  font:
-    10px "Manrope Variable",
-    system-ui,
-    sans-serif;
-  color: #8d8899;
-  margin-left: 5px;
-  font-weight: 500;
-}
 #blockly {
   flex: 1;
   position: relative;
@@ -301,7 +273,7 @@ main {
   border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 0 17px;
   font-size: 10px;
   color: #8d8899;
@@ -323,17 +295,6 @@ main {
     monospace;
   color: #8977b0;
   margin-right: 2px;
-}
-.live-label {
-  font:
-    9px "IBM Plex Mono",
-    monospace;
-  color: #8d9f8c;
-  letter-spacing: 1px;
-}
-.live-label:before {
-  content: "•";
-  margin-right: 4px;
 }
 .code-file {
   display: flex;
@@ -471,32 +432,11 @@ main {
   background: #faf6ec;
   color: #99804b;
 }
-.local-note {
-  margin: auto 17px 17px;
-  padding: 15px 13px;
-  background: #f5f4f8;
-  display: flex;
-  gap: 10px;
-  border: 1px solid #eeebf4;
-  border-radius: 8px;
-  color: #8d7ca8;
-}
-.local-note strong {
-  font-size: 10px;
-  font-weight: 700;
-  color: #797185;
-}
-.local-note p {
-  font-size: 10px;
-  line-height: 1.8;
-  margin: 4px 0 0;
-  color: #a09aa8;
-}
 footer {
   height: 54px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   color: #a4a0ab;
   font-size: 10px;
 }
@@ -610,24 +550,6 @@ dialog p {
   color: #92889c;
   font-weight: 500;
 }
-.help-steps {
-  padding-left: 20px;
-  font-size: 12px;
-  line-height: 1.9;
-}
-.help-steps li {
-  margin: 10px 0;
-  padding-left: 5px;
-}
-.help-note {
-  background: #f5f2fa;
-  padding: 12px;
-  border-radius: 7px;
-}
-dialog > a {
-  font-size: 11px;
-  color: #8b73ab;
-}
 .toast {
   position: fixed;
   bottom: 25px;
@@ -671,13 +593,6 @@ dialog > a {
   .studio {
     grid-template-columns: minmax(0, 1fr) 310px;
   }
-  .workspace-hint {
-    gap: 14px;
-    padding: 0 14px;
-  }
-  .workspace-hint b {
-    font-size: 9px;
-  }
   .panel-toolbar {
     padding: 0 12px;
   }
@@ -719,9 +634,6 @@ dialog > a {
     min-height: 220px;
     max-height: 380px;
   }
-  .local-note {
-    margin-top: 0;
-  }
   .project-bar {
     flex-wrap: wrap;
     gap: 18px;
@@ -738,19 +650,9 @@ dialog > a {
   .brand {
     font-size: 17px;
   }
-  .app-header > .quiet {
-    font-size: 10px;
-  }
   footer {
     gap: 20px;
     height: 65px;
-    font-size: 9px;
-  }
-  .workspace-hint {
-    justify-content: space-between;
-    gap: 8px;
-  }
-  .workspace-hint b {
     font-size: 9px;
   }
   .workspace-bottom {
