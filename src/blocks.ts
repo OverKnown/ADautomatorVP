@@ -1,6 +1,8 @@
+import { getLanguage, t } from "./i18n";
 import type * as BlocklyTypes from "blockly/core";
 import Blockly from "./blockly-runtime";
 import * as Ru from "blockly/msg/ru";
+import * as En from "blockly/msg/en";
 import {
   currencies,
   operators,
@@ -9,13 +11,6 @@ import {
   compile,
 } from "./compiler";
 
-Blockly.setLocale(
-  Object.fromEntries(
-    Object.entries(Reflect.get(Ru, "default") ?? Ru).filter(
-      (entry): entry is [string, string] => typeof entry[1] === "string",
-    ),
-  ),
-);
 const dropdown = (name: string, values: string[] | string[][]) => ({
   type: "field_dropdown",
   name,
@@ -39,10 +34,10 @@ const layerColours = {
 };
 type Layer = keyof typeof layerColours;
 const layer = () => dropdown("LAYER", Object.keys(layerColours));
-const autoSettings: [string, string][] = [
-  ["по количеству", "AMOUNT"],
-  ["через время", "TIME"],
-  ["× максимальной награды", "MULTIPLIER"],
+const autoSettings = (): [string, string][] => [
+  [t("by amount"), "AMOUNT"],
+  [t("after time"), "TIME"],
+  [t("× highest reward"), "MULTIPLIER"],
 ];
 Blockly.Extensions.register("layer_colour", function () {
   const field = this.getField("LAYER")!;
@@ -55,7 +50,9 @@ Blockly.Extensions.register("layer_colour", function () {
     if (this.type === "auto_amount") {
       const setting = this.getField("SETTING") as BlocklyTypes.FieldDropdown;
       const previous = setting.getValue();
-      setting.setOptions(value === "REALITY" ? autoSettings.slice(0, 1) : autoSettings);
+      setting.setOptions(
+        value === "REALITY" ? autoSettings().slice(0, 1) : autoSettings(),
+      );
       setting.setValue(value === "REALITY" ? "AMOUNT" : previous);
       this.getField("UNIT")!.setVisible(setting.getValue() === "TIME");
     }
@@ -74,81 +71,89 @@ const condition = () => [
   dropdown("OP", operators),
   text("VALUE", "1e100"),
 ];
-const definitions = [
+const definitions = () => [
   {
     type: "start",
-    message0: "▶  Начало скрипта",
+    message0: t("▶  Script start"),
     args0: [],
     colour: "#51458a",
     previousStatement: undefined,
-    tooltip: "Соедините все команды в одну цепочку под этим блоком.",
+    tooltip: t("Connect all commands in a single chain below this block."),
   },
   {
     type: "wait",
-    message0: "Ждать  %1 %2 %3",
+    message0: t("Wait  %1 %2 %3"),
     args0: condition(),
     colour: "#5d6c9c",
-    tooltip: "Ждать, пока сравнение станет истинным. WAIT",
+    tooltip: t("Wait until the comparison is true. WAIT"),
   },
   ...(["if", "while", "until"] as const).map((type, i) => ({
     type,
-    message0: `${["Если", "Пока", "До выполнения"][i]}  %1 %2 %3`,
+    message0: `${[t("If"), t("While"), t("Until")][i]}  %1 %2 %3`,
     args0: condition(),
-    message1: "выполнять %1",
+    message1: t("do %1"),
     args1: [{ type: "input_statement", name: "BODY" }],
     colour: "#5d6c9c",
     tooltip: [
-      "Выполнить вложенные команды один раз, если условие истинно.",
-      "Повторять вложенные команды, пока условие истинно.",
-      "Повторять вложенные команды, пока условие не станет истинным.",
+      t("Run nested commands once if the condition is true."),
+      t("Repeat nested commands while the condition is true."),
+      t("Repeat nested commands until the condition becomes true."),
     ][i],
   })),
   {
     type: "auto",
-    message0: "Автосброс  %1 %2",
+    message0: t("Auto prestige  %1 %2"),
     args0: [
       layer(),
       dropdown("MODE", [
-        ["включить", "ON"],
-        ["выключить", "OFF"],
+        [t("on"), "ON"],
+        [t("off"), "OFF"],
       ]),
     ],
     colour: layerColours.INFINITY,
     extensions: ["layer_colour"],
-    tooltip:
-      "AUTO ON/OFF. Включить или выключить автосброс, не меняя текущий порог.",
+    tooltip: t(
+      "AUTO ON/OFF. Enable or disable auto prestige without changing its current threshold.",
+    ),
   },
   {
     type: "auto_amount",
-    message0: "Автосброс  %1  %2 %3 %4",
+    message0: t("Auto prestige  %1  %2 %3 %4"),
     args0: [
-      layer(), dropdown("SETTING", autoSettings), text("VALUE", "1e10"),
-      dropdown("UNIT", [["сек", "SEC"], ["мс", "MS"], ["мин", "MIN"]]),
+      layer(),
+      dropdown("SETTING", autoSettings()),
+      text("VALUE", "1e10"),
+      dropdown("UNIT", [
+        [t("sec"), "SEC"],
+        [t("ms"), "MS"],
+        [t("min"), "MIN"],
+      ]),
     ],
     colour: layerColours.INFINITY,
     extensions: ["layer_colour"],
-    tooltip:
-      "AUTO: количество IP/EP/RM, время или множитель максимальной награды. Время и множитель доступны для Infinity и Eternity после игровых разблокировок.",
+    tooltip: t(
+      "AUTO: IP/EP/RM amount, time, or a multiplier of the highest reward. Time and multiplier modes require in-game unlocks for Infinity and Eternity.",
+    ),
   },
   {
     type: "pause",
-    message0: "Пауза  %1 %2",
+    message0: t("Pause  %1 %2"),
     args0: [
       text("VALUE", "1"),
       dropdown("UNIT", [
-        ["сек", "SEC"],
-        ["мс", "MS"],
-        ["мин", "MIN"],
+        [t("sec"), "SEC"],
+        [t("ms"), "MS"],
+        [t("min"), "MIN"],
       ]),
     ],
     colour: "#5d6c9c",
-    tooltip: "Пауза по реальному времени. PAUSE",
+    tooltip: t("Pause for a real-time duration. PAUSE"),
   },
   {
     type: "prestige",
-    message0: "Сброс  %1",
+    message0: t("Prestige  %1"),
     args0: [layer()],
-    message1: "не ждать %1  %2 %3",
+    message1: t("nowait %1  %2 %3"),
     args1: [
       checkbox("NOWAIT"),
       { type: "field_label", name: "RESPEC_LABEL", text: "respec" },
@@ -156,40 +161,42 @@ const definitions = [
     ],
     colour: layerColours.INFINITY,
     extensions: ["layer_colour"],
-    tooltip:
-      "По умолчанию ждёт доступности сброса. RESPEC: исследования для Eternity, глифы для Reality; недоступен для Infinity.",
+    tooltip: t(
+      "Waits for prestige to become available by default. RESPEC resets studies for Eternity or glyphs for Reality; unavailable for Infinity.",
+    ),
   },
   {
     type: "studies",
-    message0: "Купить исследования  %1",
+    message0: t("Buy studies  %1"),
     args0: [text("VALUE", "11,21,31")],
-    message1: "не ждать %1",
+    message1: t("nowait %1"),
     args1: [checkbox("NOWAIT")],
     colour: layerColours.ETERNITY,
-    tooltip:
-      "STUDIES PURCHASE. Номера через запятую; без NOWAIT ждёт покупки всех исследований.",
+    tooltip: t(
+      "STUDIES PURCHASE. Comma-separated IDs; waits until all studies are bought unless NOWAIT is enabled.",
+    ),
   },
   {
     type: "load",
-    message0: "Загрузить пресет исследований  %1",
+    message0: t("Load study preset  %1"),
     args0: [dropdown("SLOT", ["1", "2", "3", "4", "5", "6"])],
-    message1: "не ждать %1",
+    message1: t("nowait %1"),
     args1: [checkbox("NOWAIT")],
     colour: layerColours.ETERNITY,
-    tooltip:
-      "STUDIES LOAD ID. Использует пресет, сохранённый в игре, а не в конструкторе.",
+    tooltip: t("STUDIES LOAD ID. Uses a preset saved in the game."),
   },
   {
     type: "study_respec",
-    message0: "Сбросить исследования при Eternity",
+    message0: t("Respec studies on Eternity"),
     args0: [],
     colour: layerColours.ETERNITY,
-    tooltip:
-      "STUDIES RESPEC: отмечает исследования для сброса при следующей Eternity.",
+    tooltip: t(
+      "STUDIES RESPEC: marks studies for respec on the next Eternity.",
+    ),
   },
   {
     type: "unlock",
-    message0: "Открыть  %1  не ждать %2",
+    message0: t("Unlock  %1  nowait %2"),
     args0: [
       dropdown("TARGET", [
         "DILATION",
@@ -198,11 +205,11 @@ const definitions = [
       checkbox("NOWAIT"),
     ],
     colour: layerColours.ETERNITY,
-    tooltip: "UNLOCK: купить открытие испытания или Dilation.",
+    tooltip: t("UNLOCK: purchase a challenge or Dilation unlock."),
   },
   {
     type: "start_ec",
-    message0: "Начать испытание Eternity  %1",
+    message0: t("Start Eternity Challenge  %1"),
     args0: [
       dropdown(
         "EC",
@@ -210,65 +217,103 @@ const definitions = [
       ),
     ],
     colour: layerColours.ETERNITY,
-    tooltip: "START EC. Испытание должно быть открыто.",
+    tooltip: t("START EC. The challenge must already be unlocked."),
   },
   {
     type: "dilation",
-    message0: "Начать Dilation",
+    message0: t("Start Dilation"),
     args0: [],
     colour: layerColours.ETERNITY,
     tooltip: "START DILATION",
   },
   {
     type: "bh",
-    message0: "Чёрная дыра  %1",
+    message0: t("Black Hole  %1"),
     args0: [
       dropdown("MODE", [
-        ["включить", "ON"],
-        ["выключить", "OFF"],
+        [t("on"), "ON"],
+        [t("off"), "OFF"],
       ]),
     ],
     colour: layerColours.REALITY,
-    tooltip: "BLACK HOLE ON/OFF. Требует открытия чёрной дыры в игре.",
+    tooltip: t(
+      "BLACK HOLE ON/OFF. Requires the Black Hole to be unlocked in the game.",
+    ),
   },
   {
     type: "comment",
-    message0: "Комментарий  %1",
-    args0: [text("TEXT", "Мой сценарий")],
+    message0: t("Comment  %1"),
+    args0: [text("TEXT", t("My script"))],
     colour: "#747782",
-    tooltip: "Пояснение в коде, не выполняется.",
+    tooltip: t("A note in the code; not executed."),
   },
   {
     type: "raw",
-    message0: "Свой код  %1",
+    message0: t("Custom code  %1"),
     args0: [text("TEXT", "WAIT EP >= 1e100")],
     colour: "#8c6264",
-    tooltip: "Одна строка кода Automator. Синтаксис не проверяется.",
+    tooltip: t("One line of Automator code. Syntax is not checked."),
   },
   {
     type: "notify",
-    message0: "Уведомление  %1",
-    args0: [text("TEXT", "Готово")],
+    message0: t("Notification  %1"),
+    args0: [text("TEXT", t("Done"))],
     colour: "#747782",
-    tooltip: "NOTIFY: показать уведомление в игре.",
+    tooltip: t("NOTIFY: show an in-game notification."),
   },
   {
     type: "stop",
-    message0: "■  Остановить скрипт",
+    message0: t("■  Stop script"),
     args0: [],
     colour: "#8c6264",
-    tooltip: "STOP: остановить выполнение Automator.",
+    tooltip: t("STOP: stop Automator execution."),
   },
 ];
 
-Blockly.defineBlocksWithJsonArray(
-  definitions.map((def) => ({
-    previousStatement: null,
-    nextStatement: null,
-    inputsInline: true,
-    ...def,
-  })),
-);
+export function registerLocalizedBlocks() {
+  const locale = getLanguage() === "ru" ? Ru : En;
+  Blockly.setLocale(
+    Object.fromEntries(
+      Object.entries(Reflect.get(locale, "default") ?? locale).filter(
+        (entry): entry is [string, string] => typeof entry[1] === "string",
+      ),
+    ),
+  );
+  const localized = definitions();
+  // Replace only our own definitions when the user changes language.
+  for (const def of localized) delete Blockly.Blocks[def.type];
+  Blockly.defineBlocksWithJsonArray(
+    localized.map((def) => ({
+      previousStatement: null,
+      nextStatement: null,
+      inputsInline: true,
+      ...def,
+    })),
+  );
+}
+registerLocalizedBlocks();
+
+// Recreate labels from localized definitions while retaining user fields, IDs,
+// connections, positions, and undo/redo events that refer to those IDs.
+export function relocalizeWorkspace(workspace: BlocklyTypes.Workspace) {
+  const state = Blockly.serialization.workspaces.save(workspace);
+  const undo = workspace.getUndoStack().slice();
+  const redo = workspace.getRedoStack().slice();
+  Blockly.Events.disable();
+  try {
+    registerLocalizedBlocks();
+    Blockly.serialization.workspaces.load(state, workspace);
+    workspace
+      .getUndoStack()
+      .splice(0, workspace.getUndoStack().length, ...undo);
+    workspace
+      .getRedoStack()
+      .splice(0, workspace.getRedoStack().length, ...redo);
+  } finally {
+    Blockly.Events.enable();
+  }
+}
+
 export const theme = Blockly.Theme.defineTheme("antimatter", {
   name: "antimatter",
   base: Blockly.Themes.Classic,
@@ -291,13 +336,17 @@ const category = (name: string, colour: string, blocks: string[]) => ({
   colour,
   contents: blocks.map((type) => ({ kind: "block", type })),
 });
-export const toolbox = {
+export const createToolbox = () => ({
   kind: "categoryToolbox",
   contents: [
-    category("Ожидание, условия и циклы", "#5d6c9c", [
-      "wait", "pause", "if", "while", "until",
+    category(t("Wait, conditions & loops"), "#5d6c9c", [
+      "wait",
+      "pause",
+      "if",
+      "while",
+      "until",
     ]),
-    category("Сбросы", "#46766b", ["prestige", "auto", "auto_amount"]),
+    category(t("Prestige"), "#46766b", ["prestige", "auto", "auto_amount"]),
     category("Eternity", layerColours.ETERNITY, [
       "studies",
       "load",
@@ -307,9 +356,9 @@ export const toolbox = {
       "dilation",
     ]),
     category("Reality", layerColours.REALITY, ["bh"]),
-    category("Другое", "#747782", ["comment", "notify", "raw", "stop"]),
+    category(t("Other"), "#747782", ["comment", "notify", "raw", "stop"]),
   ],
-};
+});
 
 export function blockToCommand(block: BlocklyTypes.Block): Command {
   const fields: Record<string, string> = {};
@@ -343,20 +392,21 @@ export function compileWorkspace(workspace: BlocklyTypes.Workspace) {
     result.issues.unshift({
       id: starts[0]?.id ?? "",
       severity: "error",
-      message: "В проекте должен быть ровно один блок «Начало скрипта».",
+      message: t("The project must contain exactly one “Script start” block."),
     });
   for (const block of roots.filter((block) => block !== starts[0]))
     result.issues.push({
       id: block.id,
       severity: "error",
-      message:
-        "Блок не подключён к началу скрипта. Соедините его с основной цепочкой.",
+      message: t(
+        "This block is disconnected from the script start. Connect it to the main chain.",
+      ),
     });
   if (!commands.length)
     result.issues.push({
       id: starts[0]?.id ?? "",
       severity: "warning",
-      message: "Добавьте команды под блок «Начало скрипта».",
+      message: t("Add commands below the “Script start” block."),
     });
   return result;
 }

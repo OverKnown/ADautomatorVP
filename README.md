@@ -1,30 +1,32 @@
 # Automator Studio
 
-# !!! ПОЛНОСТЬЮ ЗАВАЙБКОЖЕНО !!!
-Я создал это безобразие как проверку возможностей Codex и для собственного пользования. Мне очень стыдно за это.
+# !!! ENTIRELY VIBE-CODED !!!
 
-Визуальный конструктор скриптов **Automator для Antimatter Dimensions**. Русский интерфейс, соединяемые блоки Blockly, код справа и сохранение проектов на устройстве. Статический сайт: сервер приложения, аккаунты и база данных не нужны.
+I created this monstrosity to test Codex's capabilities and for my own use. I'm very ashamed of it.
 
-## Возможности
+A visual script builder for the **Antimatter Dimensions Automator**. English and Russian interfaces, connected Blockly blocks, generated code on the right, and projects saved on your device. A static site: no application server, accounts, or database required.
 
-- Последовательности, вложенные `IF`, `WHILE`, `UNTIL`, ожидание условий и паузы.
-- `AUTO` (вкл./выкл./порог), Infinity/Eternity/Reality с NOWAIT и RESPEC.
-- Покупка исследований по номерам, загрузка игрового пресета 1–6, сброс исследований, открытие EC/Dilation, запуск EC/Dilation, чёрная дыра.
-- Комментарии, уведомления, остановка и блок одной строки непроверенного кода.
-- Генерация текста, проверка параметров и соединения блоков, переход к проблемному блоку.
-- Автосохранение в `localStorage`, JSON-проекты, копирование кода и TXT-экспорт, отмена/повтор.
-- Три учебных сценария. Их пороги нужно адаптировать под своё сохранение.
+## Features
 
-## Запуск на компьютере
+- English by default, with an **English / Русский** language selector. Your choice is saved in this browser. Switching languages preserves the current project, its text, and undo/redo history.
+- Sequences, nested `IF`, `WHILE`, and `UNTIL`, condition waits, and pauses.
+- `AUTO` (on/off/threshold), Infinity/Eternity/Reality with NOWAIT and RESPEC.
+- Purchase studies by ID, load in-game presets 1–6, respec studies, unlock EC/Dilation, start EC/Dilation, and control the Black Hole.
+- Comments, notifications, stop commands, and a block for one line of unchecked custom code.
+- Code generation, parameter and block connection validation, and navigation to problematic blocks.
+- Autosave in `localStorage`, JSON projects, code copying and TXT export, undo/redo.
+- Three learning examples. Adjust their thresholds to your own save.
 
-Нужен Node.js 24 LTS.
+## Running locally
+
+Requires Node.js 24 LTS.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Откройте адрес, который напечатает Vite. Для сборки и проверки:
+Open the URL printed by Vite. To test, build, and preview:
 
 ```sh
 npm test
@@ -32,53 +34,57 @@ npm run build
 npm run preview
 ```
 
-Содержимое `dist/` можно разместить на любом статическом хостинге. Относительные пути позволяют запускать сайт в подпапке GitHub Pages. Открывать `index.html` двойным щелчком не нужно: приложение использует JavaScript-модули и требует HTTP(S).
+The contents of `dist/` can be deployed to any static host. Relative paths support hosting in a GitHub Pages subdirectory. Do not open `index.html` by double-clicking it: the application uses JavaScript modules and requires HTTP(S).
 
 ## GitHub Pages
 
-В репозитории включён workflow `.github/workflows/pages.yml`:
+The repository includes the workflow `.github/workflows/pages.yml`.
 
-GitHub Pages бесплатен для публичных репозиториев. Для приватного репозитория нужен подходящий платный тариф GitHub. Видимость репозитория приложение и workflow не меняют.
+GitHub Pages is free for public repositories. Private repositories require an eligible paid GitHub plan. Neither the application nor the workflow changes repository visibility.
 
-1. В GitHub откройте **Settings → Pages → Build and deployment → Source → GitHub Actions**.
-2. Перенесите изменения в ветку `main`. Каждый push в `main` запускает тесты, сборку и публикацию `dist/`. Для pull request запускаются только проверки.
-3. При необходимости запустите **Actions → Build and deploy to GitHub Pages → Run workflow** на `main`.
-4. Адрес опубликованного сайта появится в результате задания `deploy` и в Settings → Pages. Для этого репозитория ожидаемый адрес: `https://overknown.github.io/ADautomatorVP/` (доступен только после успешного развёртывания).
+1. In GitHub, open **Settings → Pages → Build and deployment → Source → GitHub Actions**.
+2. Merge the changes into `main`. Each push to `main` runs the tests, builds the site, and publishes `dist/`. Pull requests only run checks.
+3. If needed, run **Actions → Build and deploy to GitHub Pages → Run workflow** on `main`.
+4. The published URL appears in the `deploy` job output and in Settings → Pages. The expected URL for this repository is `https://overknown.github.io/ADautomatorVP/` (available only after a successful deployment).
 
-Если Pages ещё не включён или ограничен настройками репозитория, сборка всё равно проверяется, но публикация потребует настройки выше.
+If Pages has not been enabled or is restricted by repository settings, the build is still checked, but publishing requires the setup above.
 
-## Работа с проектом
+## Working with projects
 
-Перетащите блоки из категорий в единственную цепочку под «Начало скрипта». Изменяйте параметры прямо в блоках. Внутрь условий и циклов вкладываются команды. Клик по строке кода или ошибке показывает связанный блок.
+Drag blocks from the categories into a single chain below “Script start”. Edit parameters directly in the blocks. Nest commands inside conditions and loops. Clicking a code line or an error shows the associated block.
 
-Кнопка **Сохранить проект** скачивает JSON с блоками. **Открыть TXT / JSON** восстанавливает JSON-проект или преобразует текст Automator в блоки. Кнопка **Вставить код** позволяет импортировать текст из буфера вручную. TXT можно редактировать в игре и открывать обратно: расположение блоков строится заново. JSON остаётся резервным форматом с расположением блоков.
+**Save project** downloads a JSON file containing the blocks. **Open TXT / JSON** restores a JSON project or converts Automator text into blocks. **Paste code** lets you import text manually from the clipboard. You can edit TXT in the game and open it again: block positions are rebuilt. JSON remains the backup format that preserves block positions.
 
-Автосохранение относится только к данному адресу сайта и браузеру. Очистка данных сайта его удаляет. Для переноса между устройствами сохраняйте JSON. При обнаружении изменений в другой вкладке автосохранение приостанавливается: скачайте свою копию и обновите страницу. Повреждённый импорт не заменяет открытый проект; повреждённое автосохранение не перезаписывается автоматически.
+Autosave is specific to this site's URL and your browser. Clearing site data deletes it. Save JSON files to transfer projects between devices. If changes are detected in another tab, autosave pauses: download your copy and reload the page. A damaged import does not replace the open project; damaged autosave data is not overwritten automatically.
 
-Рабочая область ограничена 500 блоками. JSON ограничен 2 МБ и 80 уровнями вложенных условий. Файлы и содержимое проектов не отправляются на сервер. Шрифты и графические ресурсы включены в сборку; сторонние CDN не нужны. Это не PWA: повторная загрузка сайта без сети не гарантируется.
+The workspace is limited to 500 blocks. JSON files are limited to 2 MB and 80 levels of nested conditions. Project files and contents are not sent to a server. Fonts and graphical assets are bundled; no third-party CDNs are required. This is not a PWA: reloading the site offline is not guaranteed to work.
 
-## Совместимость и границы проверки
+## Compatibility and validation limits
 
-Синтаксис сверен с [automator-commands.js](https://github.com/IvarK/AntimatterDimensionsSourceCode/blob/master/src/core/automator/automator-commands.js) и [lexer.js](https://github.com/IvarK/AntimatterDimensionsSourceCode/blob/master/src/core/automator/lexer.js) игры 4 ноября 2026 года.
+Syntax was checked against the game's [automator-commands.js](https://github.com/IvarK/AntimatterDimensionsSourceCode/blob/master/src/core/automator/automator-commands.js) and [lexer.js](https://github.com/IvarK/AntimatterDimensionsSourceCode/blob/master/src/core/automator/lexer.js) on November 4, 2026.
 
-Проверяются структура, параметры поддерживаемых команд, числовая запись, номера исследований и ограничения вроде отсутствия `RESPEC` у Infinity. Большие значения (`1e1000`) сохраняются строками. Блок «Свой код» всегда помечается как непроверенный. Встроенные блоки принимают ограниченное подмножество синтаксиса: например, покупка исследований — список номеров, а сравнение — ресурс и число.
+Validation covers structure, supported command parameters, number notation, study IDs, and restrictions such as Infinity having no `RESPEC`. Large values (`1e1000`) are preserved as strings. The “Custom code” block is always marked as unchecked. Built-in blocks accept a limited subset of the syntax: for example, study purchases use a list of IDs, and comparisons use a resource and a number.
 
-Редактор **не является симулятором**: не проверяет открытие игровых возможностей, наличие пресетов, достижимость порогов, достаточность Time Theorems и стратегию прохождения. Финальная проверка и запуск выполняются в Automator игры. Для автосбросов нужны соответствующие игровые разблокировки.
+The editor **is not a simulator**: it does not check feature unlocks, preset availability, reachable thresholds, sufficient Time Theorems, or progression strategy. Final validation and execution happen in the game's Automator. Auto prestige requires the corresponding in-game unlocks.
 
-## Структура исходников
+## Source structure
 
-- `src/blocks.ts` — блоки, категории и преобразование в дерево команд.
-- `src/compiler.ts` — генерация кода, проверки, привязка строк к блокам.
-- `src/project.ts` — формат JSON, безопасная загрузка, учебные сценарии.
-- `src/main.ts` — интерфейс, локальное сохранение, импорт/экспорт.
-- `tests/editor.test.ts` — проверки генерации и сохранения без браузера.
+- `src/blocks.ts` — blocks, categories, and conversion to a command tree.
+- `src/compiler.ts` — code generation, validation, and mapping code lines to blocks.
+- `src/project.ts` — JSON format, safe loading, conversion from commands to blocks, and learning examples.
+- `src/parser.ts` — Automator text parsing into a command tree.
+- `src/i18n.ts` — English/Russian translations and language preferences.
+- `src/main.ts` — interface, language switching, local storage, and import/export.
+- `tests/editor.test.ts` — generation and persistence checks without a browser.
+- `tests/parser.test.ts` — TXT parsing and blocks → TXT → blocks round-trip checks.
+- `tests/i18n.test.ts` — language defaults, translations, and project preservation when switching languages.
 
-Blockly распространяется по Apache-2.0; лицензия его графических ресурсов находится в `public/blockly-media/LICENSE`. Manrope и IBM Plex Mono поставляются через Fontsource; файлы лицензий сохранены в `public/licenses/`. Проект не является официальной частью Antimatter Dimensions.
+Blockly is distributed under Apache-2.0; its graphical asset license is in `public/blockly-media/LICENSE`. Manrope and IBM Plex Mono are supplied through Fontsource; their license files are saved in `public/licenses/`. This project is not an official part of Antimatter Dimensions.
 
-## Импорт кода Automator
+## Importing Automator code
 
-Парсер использует общее с генератором дерево `Command` и общую проверку параметров. Поддерживаются все команды, которые генерируют стандартные блоки, включая вложенные IF/WHILE/UNTIL, комментарии `#` и `//`, регистр команд и переводы строк Windows. Открывающая скобка может находиться в конце условия или на следующей строке; закрывающая — на отдельной строке. Однострочные тела циклов не поддерживаются.
+The parser shares the `Command` tree and parameter validation with the generator. It supports all commands generated by standard blocks, including nested IF/WHILE/UNTIL, `#` and `//` comments, case-insensitive commands, and Windows line endings. An opening brace may follow the condition or appear on the next line; a closing brace must be on its own line. Single-line loop bodies are not supported.
 
-Неизвестные одиночные команды, включая расширенные формы языка, сохраняются в «Свой код» и требуют проверки в игре. Это не полная синтаксическая проверка языка: неверная неизвестная строка тоже будет сохранена с предупреждением. Неизвестные конструкции со скобками, ошибки структуры и некорректные параметры распознанных команд отклоняются с номером строки. Ошибка не заменяет текущий проект. Встроенные комментарии после команды переносятся в отдельный блок; пустые строки и оформление отступов нормализуются.
+Unknown individual commands, including advanced language forms, are preserved in “Custom code” blocks and require validation in the game. This is not full syntax validation: an invalid unknown line is also preserved with a warning. Unknown braced structures, structural errors, and invalid parameters in recognized commands are rejected with a line number. An error does not replace the current project. Inline comments after commands become separate blocks; blank lines and indentation are normalized.
 
-`src/parser.ts` превращает TXT в дерево команд; `commandsToProject` в `src/project.ts` строит блоки из дерева. При добавлении новой команды обновляйте её текстовое распознавание и тест цикла «блоки → TXT → блоки». Изменение оформления блоков не требует изменения парсера.
+`src/parser.ts` converts TXT into a command tree; `commandsToProject` in `src/project.ts` builds blocks from that tree. When adding a command, update its text recognition and the blocks → TXT → blocks round-trip test. Changing the appearance of blocks does not require changing the parser.

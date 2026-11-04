@@ -29,7 +29,7 @@ test("starter generates commands in connected order, using pending EP", () =>
     assert.deepEqual(result.issues, []);
     assert.equal(
       result.code,
-      '# Пример: дождаться награды и выполнить Eternity\nAUTO INFINITY ON\nWAIT PENDING EP >= 1e100\nETERNITY\nNOTIFY "Eternity завершена"',
+      '# Example: wait for the reward and perform Eternity\nAUTO INFINITY ON\nWAIT PENDING EP >= 1e100\nETERNITY\nNOTIFY "Eternity complete"',
     );
     assert.equal(result.lineIds.length, 5);
   }));
@@ -165,7 +165,7 @@ test("auto settings hide unsupported options and round-trip selected modes", () 
     assert.equal(restored.getField("UNIT")!.isVisible(), false);
     restored.setFieldValue("REALITY", "LAYER");
     assert.equal(restored.getFieldValue("SETTING"), "AMOUNT");
-    assert.deepEqual((restored.getField("SETTING") as BlocklyTypes.FieldDropdown).getOptions(false), [["по количеству", "AMOUNT"]]);
+    assert.deepEqual((restored.getField("SETTING") as BlocklyTypes.FieldDropdown).getOptions(false), [["by amount", "AMOUNT"]]);
     assert.equal(compile([blockToCommand(restored)]).code, "AUTO REALITY 5 RM");
     restored.setFieldValue("INFINITY", "LAYER");
     assert.equal((restored.getField("SETTING") as BlocklyTypes.FieldDropdown).getOptions(false).length, 3);
@@ -250,14 +250,14 @@ test("import rejects foreign formats, versions, oversized and malformed projects
     assert.throws(() => parseProject(data));
   const unsupported = example("empty") as any;
   unsupported.workspace.blocks.blocks[0].type = "javascript_eval";
-  assert.throws(() => parseProject(JSON.stringify(unsupported)), /неизвестный/);
+  assert.throws(() => parseProject(JSON.stringify(unsupported)), /unknown/);
 });
 test("invalid dropdown fields are rejected even if the file has no block ids", () => {
   const data = example("starter") as any;
   data.workspace.blocks.blocks[0].next.block.next.block.fields.LAYER = "BAD";
   assert.throws(
     () => parseProject(JSON.stringify(data)),
-    /Недопустимое значение/,
+    /Invalid value/,
   );
 });
 test("rejected import leaves the current workspace untouched", () =>

@@ -1,5 +1,18 @@
+import {
+  getLanguage,
+  setLanguage,
+  t,
+  translatePage,
+  LANGUAGE_STORAGE_KEY,
+  type Message,
+} from "./i18n";
 import Blockly from "./blockly-runtime";
-import { compileWorkspace, theme, toolbox } from "./blocks";
+import {
+  compileWorkspace,
+  theme,
+  createToolbox,
+  relocalizeWorkspace,
+} from "./blocks";
 import {
   example,
   makeProject,
@@ -12,9 +25,12 @@ import "./style.css";
 
 const el = <T extends HTMLElement = HTMLElement>(id: string) =>
   document.getElementById(id) as T;
+translatePage();
+const languageSelect = el<HTMLSelectElement>("language");
+languageSelect.value = getLanguage();
 const nameInput = el<HTMLInputElement>("project-name");
 const workspace = Blockly.inject("blockly", {
-  toolbox,
+  toolbox: createToolbox(),
   theme,
   renderer: "zelos",
   media: `${import.meta.env.BASE_URL}blockly-media/`,
@@ -47,21 +63,25 @@ function toast(message: string) {
   }, 5000);
 }
 function project() {
-  return makeProject(nameInput.value.trim() || "Новый скрипт", workspace);
+  return makeProject(nameInput.value.trim() || t("New script"), workspace);
+}
+function setSaveState(message: Message, error = false) {
+  const node = el("save-state");
+  node.dataset.i18n = message;
+  node.textContent = t(message);
+  node.classList.toggle("save-error", error);
 }
 function saveLocal() {
   if (saveBlocked) return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(project()));
-    el("save-state").textContent = "● Сохранено в этом браузере";
-    el("save-state").classList.remove("save-error");
+    setSaveState("● Saved in this browser");
   } catch {
-    el("save-state").textContent = "Автосохранение недоступно — скачайте JSON";
-    el("save-state").classList.add("save-error");
+    setSaveState("Autosave unavailable — download JSON", true);
   }
 }
 function scheduleSave() {
-  if (!saveBlocked) el("save-state").textContent = "Сохраняем…";
+  if (!saveBlocked) setSaveState("Saving…");
   clearTimeout(saveTimer);
   saveTimer = setTimeout(saveLocal, 400);
 }
@@ -101,16 +121,20 @@ function update() {
   result = compileWorkspace(workspace);
   const errors = result.issues.filter((i) => i.severity === "error");
   const warnings = result.issues.filter((i) => i.severity === "warning");
-  el("block-count").textContent =
-    `${Math.max(0, workspace.getAllBlocks(false).length - 1)} блоков`;
-  el("line-count").textContent = `${result.lineIds.length} строк`;
+  el("block-count").textContent = t("{count} blocks", {
+    count: Math.max(0, workspace.getAllBlocks(false).length - 1),
+  });
+  el("line-count").textContent = t("{count} lines", {
+    count: result.lineIds.length,
+  });
   const code = el("code");
   code.replaceChildren();
   if (!result.code) {
     const empty = document.createElement("p");
     empty.className = "code-placeholder";
-    empty.textContent =
-      "Соедини первую команду с блоком «Начало скрипта» — здесь появится код.";
+    empty.textContent = t(
+      "Connect the first command to “Script start” to see the code here.",
+    );
     code.append(empty);
   } else
     result.code.split("\n").forEach((line, i) => {
@@ -128,10 +152,10 @@ function update() {
     });
   const status = el("validation-status");
   status.textContent = errors.length
-    ? `● Ошибок: ${errors.length}`
+    ? t("● Errors: {count}", { count: errors.length })
     : warnings.length
-      ? `◐ Замечаний: ${warnings.length}`
-      : "✓ Структура в порядке";
+      ? t("◐ Warnings: {count}", { count: warnings.length })
+      : t("✓ Structure looks good");
   status.className = errors.length
     ? "invalid"
     : warnings.length
@@ -148,7 +172,7 @@ function update() {
   });
   for (const id of ["copy", "download-code"]) {
     el<HTMLButtonElement>(id).disabled = errors.length > 0 || !result.code;
-    el(id).title = errors.length ? "Сначала исправьте ошибки блоков" : "";
+    el(id).title = errors.length ? t("Fix the block errors first") : "";
   }
   el<HTMLButtonElement>("undo").disabled =
     workspace.getUndoStack().length === 0;
@@ -168,7 +192,7 @@ workspace.addChangeListener((event) => {
 nameInput.addEventListener("input", scheduleSave);
 nameInput.addEventListener("blur", () => {
   if (!nameInput.value.trim()) {
-    nameInput.value = "Новый скрипт";
+    nameInput.value = t("New script");
     saveLocal();
   }
 });
@@ -195,7 +219,7 @@ function downloadProject() {
     filename(".json"),
     "application/json",
   );
-  toast("Проект отправлен в загрузки браузера");
+  toast(t("Project sent to your browser’s downloads"));
 }
 el("save-project").addEventListener("click", downloadProject);
 el("download-code").addEventListener("click", () =>
@@ -204,7 +228,7 @@ el("download-code").addEventListener("click", () =>
 el("copy").addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(result.code);
-    toast("Код скопирован. Вставьте его в текстовый редактор Automator.");
+    toast(t("Code copied. Paste it into the Automator text editor."));
   } catch {
     // Clipboard APIs can be unavailable in non-secure local previews.
     const text = document.createElement("textarea");
@@ -222,8 +246,10 @@ el("copy").addEventListener("click", async () => {
     text.remove();
     toast(
       copied
-        ? "Код скопирован"
-        : "Браузер запретил копирование. Скачайте .txt или выделите код справа.",
+        ? t("Code copied")
+        : t(
+            "Your browser blocked copying. Download .txt or select the code on the right.",
+          ),
     );
   }
 });
@@ -241,13 +267,17 @@ el("check").addEventListener("click", () => {
   if (issue) focusBlock(issue.id);
   toast(
     result.issues.some((i) => i.severity === "error")
-      ? "Исправьте ошибки, перечисленные под кодом."
-      : "Проверка блоков завершена. Игровые условия проверяются в Automator.",
+      ? t("Fix the errors listed below the code.")
+      : t(
+          "Block validation complete. In-game conditions are checked by Automator.",
+        ),
   );
 });
 function confirmReplace() {
   return window.confirm(
-    "Заменить текущий проект? Если нужна отдельная копия, сначала нажмите «Сохранить проект».",
+    t(
+      "Replace the current project? To keep a separate copy, click “Save project” first.",
+    ),
   );
 }
 el("new-project").addEventListener("click", () => {
@@ -262,18 +292,20 @@ el<HTMLInputElement>("file-input").addEventListener("change", async (event) => {
   if (!file) return;
   try {
     if (file.size > 2_000_000)
-      throw new Error("Файл слишком большой: максимум 2 МБ.");
+      throw new Error(t("The file is too large: the limit is 2 MB."));
     const source = await file.text();
     const parsed = file.name.toLowerCase().endsWith(".json")
       ? parseProject(source)
       : scriptToProject(source, file.name.replace(/\.[^.]+$/, ""));
     if (confirmReplace()) {
       loadProject(parsed);
-      toast("Проект открыт");
+      toast(t("Project opened"));
     }
   } catch (error) {
     toast(
-      `Не удалось открыть: ${error instanceof Error ? error.message : "неверный JSON"}`,
+      t("Could not open: {message}", {
+        message: error instanceof Error ? error.message : t("invalid JSON"),
+      }),
     );
   } finally {
     input.value = "";
@@ -293,10 +325,10 @@ el("import-submit").addEventListener("click", () => {
     if (!confirmReplace()) return;
     loadProject(parsed);
     el<HTMLDialogElement>("import-dialog").close();
-    toast("Код преобразован в блоки. Проверьте замечания под кодом.");
+    toast(t("Code converted to blocks. Review the warnings below the code."));
   } catch (error) {
     el("import-error").textContent =
-      error instanceof Error ? error.message : "Не удалось прочитать скрипт";
+      error instanceof Error ? error.message : t("Could not read the script");
   }
 });
 el("examples").addEventListener("click", () =>
@@ -329,12 +361,8 @@ document.addEventListener("visibilitychange", () => {
 window.addEventListener("storage", (event) => {
   if (event.key !== STORAGE_KEY || loading) return;
   saveBlocked = true;
-  el("save-state").textContent =
-    "Проект изменён в другой вкладке — сохраните JSON и обновите страницу";
-  el("save-state").classList.add("save-error");
-  toast(
-    "Автосохранение приостановлено, чтобы не затереть изменения другой вкладки.",
-  );
+  setSaveState("Project changed in another tab — save JSON and reload", true);
+  toast(t("Autosave paused to avoid overwriting changes from another tab."));
 });
 new ResizeObserver(() => Blockly.svgResize(workspace)).observe(el("blockly"));
 try {
@@ -344,10 +372,31 @@ try {
 } catch {
   saveBlocked = true;
   loadProject(example("starter"), false);
-  el("save-state").textContent =
-    "Автосохранение недоступно или повреждено. Скачивайте JSON.";
-  el("save-state").classList.add("save-error");
+  setSaveState(
+    "Autosave is unavailable or damaged. Download JSON backups.",
+    true,
+  );
   toast(
-    "Старые данные не перезаписаны. Новый проект или открытие JSON возобновит автосохранение.",
+    t(
+      "Existing data was preserved. Create a new project or open JSON to resume autosave.",
+    ),
   );
 }
+
+languageSelect.addEventListener("change", () => {
+  const language = languageSelect.value === "ru" ? "ru" : "en";
+  Blockly.hideChaff();
+  setLanguage(language);
+  relocalizeWorkspace(workspace);
+  workspace.updateToolbox(createToolbox());
+  translatePage();
+  el("toast").hidden = true;
+  clearTimeout(toastTimer);
+  update();
+  Blockly.svgResize(workspace);
+  try {
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+  } catch {
+    // The interface still switches when browser storage is unavailable.
+  }
+});

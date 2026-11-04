@@ -18,12 +18,14 @@ body {
   margin: 0;
 }
 button,
-input {
+input,
+select {
   font: inherit;
 }
 button,
 a,
-input {
+input,
+select {
   -webkit-tap-highlight-color: transparent;
 }
 button {
@@ -48,7 +50,8 @@ button:disabled {
 }
 button:focus-visible,
 a:focus-visible,
-input:focus-visible {
+input:focus-visible,
+select:focus-visible {
   outline: 3px solid #b9a7ee;
   outline-offset: 3px;
 }
@@ -135,7 +138,9 @@ a:hover {
   padding: 3px 5px;
   border-radius: 4px;
   color: #8a7ca7;
-  font: 10px "IBM Plex Mono", monospace;
+  font:
+    10px "IBM Plex Mono",
+    monospace;
   letter-spacing: 0;
 }
 main {
@@ -195,7 +200,16 @@ main {
   gap: 9px;
   flex-wrap: wrap;
 }
-.project-actions button {
+.project-actions select {
+  border: 1px solid #dddee4;
+  border-radius: 7px;
+  padding: 8px;
+  background: white;
+  color: #474651;
+  cursor: pointer;
+}
+.project-actions button,
+.project-actions select {
   font-size: 12px;
 }
 .studio {

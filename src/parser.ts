@@ -1,3 +1,4 @@
+import { t } from "./i18n";
 import { compile, type Command, type Kind } from "./compiler";
 
 export class ScriptParseError extends Error {
@@ -5,7 +6,7 @@ export class ScriptParseError extends Error {
     public line: number,
     message: string,
   ) {
-    super(`Строка ${line}: ${message}`);
+    super(t("Line {line}: {message}", { line, message }));
     this.name = "ScriptParseError";
   }
 }
@@ -29,7 +30,7 @@ function splitLine(line: string): [string, string | undefined] {
 
 export function parseScript(source: string): Command[] {
   if (source.length > 2_000_000)
-    throw new ScriptParseError(1, "Максимальный размер — 2 МБ.");
+    throw new ScriptParseError(1, t("The maximum size is 2 MB."));
   const commands: Command[] = [];
   const stack = [{ commands, line: 1 }];
   const locations = new Map<string, number>();
@@ -41,9 +42,15 @@ export function parseScript(source: string): Command[] {
     line: number,
   ): Command => {
     if (++count > 499)
-      throw new ScriptParseError(line, "Максимум 499 команд плюс блок начала.");
+      throw new ScriptParseError(
+        line,
+        t("The limit is 499 commands plus the start block."),
+      );
     if (Object.values(fields).some((v) => v.length > 10000))
-      throw new ScriptParseError(line, "Параметр длиннее 10000 символов.");
+      throw new ScriptParseError(
+        line,
+        t("A parameter exceeds 10000 characters."),
+      );
     const node: Command = { id: `import-${count}`, type, fields };
     locations.set(node.id, line);
     stack.at(-1)!.commands.push(node);
@@ -66,12 +73,12 @@ export function parseScript(source: string): Command[] {
       if (text !== "{")
         throw new ScriptParseError(
           line,
-          "Ожидалась открывающая скобка { на отдельной строке.",
+          t("Expected an opening brace { on its own line."),
         );
       pendingBrace = false;
     } else if (text === "}") {
       if (stack.length === 1)
-        throw new ScriptParseError(line, "Лишняя закрывающая скобка }.");
+        throw new ScriptParseError(line, t("Unexpected closing brace }."));
       stack.pop();
     } else if ((match = text.match(/^(IF|WHILE|UNTIL)\s+(.+?)(\s*\{)?$/i))) {
       const condition = match[2]
@@ -80,7 +87,7 @@ export function parseScript(source: string): Command[] {
       if (!condition)
         throw new ScriptParseError(
           line,
-          "Для этого условия нужен формат «ресурс оператор число».",
+          t("This condition requires the format “resource operator number”."),
         );
       const node = add(
         match[1].toLowerCase() as Kind,
@@ -93,7 +100,7 @@ export function parseScript(source: string): Command[] {
       );
       node.children = [];
       if (stack.length >= 81)
-        throw new ScriptParseError(line, "Максимум 80 уровней вложенности.");
+        throw new ScriptParseError(line, t("The limit is 80 nesting levels."));
       stack.push({ commands: node.children, line });
       pendingBrace = !match[3];
     } else if (
@@ -128,7 +135,7 @@ export function parseScript(source: string): Command[] {
       )
         throw new ScriptParseError(
           line,
-          "Ресурс не соответствует слою автосброса.",
+          t("The resource does not match the auto prestige layer."),
         );
       add(
         "auto_amount",
@@ -211,7 +218,9 @@ export function parseScript(source: string): Command[] {
       if (/[{}]/.test(unquoted) || /^(IF|WHILE|UNTIL|ELSE)\b/i.test(text))
         throw new ScriptParseError(
           line,
-          "Неподдерживаемая структура. Разместите скобки и команды на отдельных строках.",
+          t(
+            "Unsupported structure. Place braces and commands on separate lines.",
+          ),
         );
       add("raw", { TEXT: text }, line);
     }
@@ -221,8 +230,8 @@ export function parseScript(source: string): Command[] {
     throw new ScriptParseError(
       stack.at(-1)!.line,
       pendingBrace
-        ? "Не найдена открывающая скобка {."
-        : "Не найдена закрывающая скобка }.",
+        ? t("Missing opening brace {.")
+        : t("Missing closing brace }."),
     );
   const error = compile(commands).issues.find(
     (issue) => issue.severity === "error",

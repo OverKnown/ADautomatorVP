@@ -1,3 +1,4 @@
+import { t } from "./i18n";
 import type * as BlocklyTypes from "blockly/core";
 import Blockly from "./blockly-runtime";
 import { types, type Command } from "./compiler";
@@ -24,44 +25,51 @@ const record = (value: unknown): value is Record<string, any> =>
 
 export function parseProject(source: string): Project {
   if (source.length > 2_000_000)
-    throw new Error("Файл слишком большой: максимум 2 МБ.");
-  const data: unknown = JSON.parse(source);
+    throw new Error(t("The file is too large: the limit is 2 MB."));
+  let data: unknown;
+  try {
+    data = JSON.parse(source);
+  } catch {
+    throw new Error(t("invalid JSON"));
+  }
   if (
     !record(data) ||
     data.format !== "ad-automator-studio" ||
     data.version !== 1
   )
     throw new Error(
-      "Это не проект Automator Studio версии 1. Откройте JSON проекта, а не текст скрипта.",
+      t(
+        "This is not an Automator Studio version 1 project. Open a project JSON file rather than script text.",
+      ),
     );
   if (
     typeof data.name !== "string" ||
     !data.name.trim() ||
     data.name.length > 100
   )
-    throw new Error("Некорректное название проекта.");
+    throw new Error(t("Invalid project name."));
   if (
     !record(data.workspace) ||
     !record(data.workspace.blocks) ||
     !Array.isArray(data.workspace.blocks.blocks)
   )
-    throw new Error("В файле нет рабочей области.");
+    throw new Error(t("The file contains no workspace."));
   let count = 0;
   const ids = new Set<string>();
   function cleanBlock(value: unknown, depth: number): Record<string, unknown> {
     if (++count > 500 || depth > 80)
       throw new Error(
-        "В проекте слишком много блоков или слишком глубокая вложенность.",
+        t("The project has too many blocks or too much nesting."),
       );
     if (!record(value) || !types.includes(value.type))
-      throw new Error("Проект содержит неизвестный тип блока.");
+      throw new Error(t("The project contains an unknown block type."));
     const out: Record<string, any> = {
       type: value.type,
       id: Blockly.utils.idGenerator.genUid(),
     };
     if (typeof value.id === "string" && value.id.length <= 100) {
       if (ids.has(value.id))
-        throw new Error("В проекте повторяются идентификаторы блоков.");
+        throw new Error(t("The project contains duplicate block IDs."));
       ids.add(value.id);
       out.id = value.id;
     }
@@ -80,7 +88,7 @@ export function parseProject(source: string): Project {
           !["string", "number", "boolean"].includes(typeof field) ||
           String(field).length > 10000
         )
-          throw new Error("Некорректные параметры блока.");
+          throw new Error(t("Invalid block parameters."));
         out.fields[key] = field;
       }
     }
@@ -95,7 +103,7 @@ export function parseProject(source: string): Project {
     }
     if (value.next !== undefined) {
       if (!record(value.next) || !record(value.next.block))
-        throw new Error("Повреждена цепочка блоков.");
+        throw new Error(t("The block chain is damaged."));
       out.next = { block: cleanBlock(value.next.block, depth) };
     }
     if (value.inputs !== undefined) {
@@ -103,14 +111,14 @@ export function parseProject(source: string): Project {
         !record(value.inputs) ||
         Object.keys(value.inputs).some((key) => key !== "BODY")
       )
-        throw new Error("Некорректная вложенность блоков.");
+        throw new Error(t("Invalid block nesting."));
       if (value.inputs.BODY) {
         if (
           !["if", "while", "until"].includes(value.type) ||
           !record(value.inputs.BODY) ||
           !record(value.inputs.BODY.block)
         )
-          throw new Error("Некорректное тело условия или цикла.");
+          throw new Error(t("Invalid condition or loop body."));
         out.inputs = {
           BODY: { block: cleanBlock(value.inputs.BODY.block, depth + 1) },
         };
@@ -134,7 +142,7 @@ export function parseProject(source: string): Project {
         1 ||
       !scratch.getTopBlocks(false).some((b) => b.type === "start")
     )
-      throw new Error("В проекте нужен один корневой блок «Начало скрипта».");
+      throw new Error(t("The project needs one root “Script start” block."));
     // Verify fields before loading into the live workspace. Dropdowns otherwise silently replace invalid values.
     function verify(raw: Record<string, any>) {
       const block = raw.id ? scratch.getBlockById(raw.id) : null;
@@ -146,7 +154,7 @@ export function parseProject(source: string): Project {
             String(field.getValue()).toUpperCase() !==
               String(value).toUpperCase()
           )
-            throw new Error(`Недопустимое значение поля ${name}.`);
+            throw new Error(t("Invalid value for field {name}.", { name }));
         }
       if (raw.next) verify(raw.next.block);
       if (raw.inputs?.BODY) verify(raw.inputs.BODY.block);
@@ -181,13 +189,13 @@ const block = (type: string, fields?: Record<string, string>): BlockState => ({
   fields,
 });
 export function example(key: string): Project {
-  let name = "Новый скрипт";
+  let name = t("New script");
   let blocks: BlockState[] = [];
   if (key === "starter") {
-    name = "Первый Eternity";
+    name = t("First Eternity");
     blocks = [
       block("comment", {
-        TEXT: "Пример: дождаться награды и выполнить Eternity",
+        TEXT: t("Example: wait for the reward and perform Eternity"),
       }),
       block("auto", { LAYER: "INFINITY", MODE: "ON" }),
       block("wait", { RESOURCE: "PENDING EP", OP: ">=", VALUE: "1e100" }),
@@ -196,13 +204,15 @@ export function example(key: string): Project {
         NOWAIT: "FALSE",
         RESPEC: "FALSE",
       }),
-      block("notify", { TEXT: "Eternity завершена" }),
+      block("notify", { TEXT: t("Eternity complete") }),
     ];
   } else if (key === "loop") {
-    name = "Цикл Eternity";
+    name = t("Eternity loop");
     blocks = [
       block("comment", {
-        TEXT: "Повторять Eternity до накопления EP; пороги настройте под своё сохранение",
+        TEXT: t(
+          "Repeat Eternity to accumulate EP; adjust thresholds to your save",
+        ),
       }),
       {
         type: "until",
@@ -224,14 +234,14 @@ export function example(key: string): Project {
           },
         },
       },
-      block("notify", { TEXT: "Цель достигнута" }),
+      block("notify", { TEXT: t("Target reached") }),
       block("stop"),
     ];
   } else if (key === "dilation") {
-    name = "Запуск Dilation";
+    name = t("Dilation run");
     blocks = [
       block("comment", {
-        TEXT: "Пресет 1 должен содержать необходимые исследования для Dilation",
+        TEXT: t("Preset 1 must contain the studies required for Dilation"),
       }),
       block("load", { SLOT: "1", NOWAIT: "FALSE" }),
       block("unlock", { TARGET: "DILATION", NOWAIT: "FALSE" }),
@@ -272,7 +282,7 @@ export function commandsToProject(commands: Command[], name: string): Project {
     JSON.stringify({
       format: "ad-automator-studio",
       version: 1,
-      name: name.trim().slice(0, 100) || "Импортированный скрипт",
+      name: name.trim().slice(0, 100) || t("Imported script"),
       workspace: {
         blocks: {
           languageVersion: 0,
@@ -290,7 +300,7 @@ export function commandsToProject(commands: Command[], name: string): Project {
 }
 export function scriptToProject(
   source: string,
-  name = "Импортированный скрипт",
+  name = t("Imported script"),
 ): Project {
   return commandsToProject(parseScript(source), name);
 }
