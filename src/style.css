@@ -474,6 +474,12 @@ footer a {
 .blocklyFlyoutLabelText {
   font-family: "Manrope Variable", system-ui, sans-serif !important;
 }
+/* Keep workspace panning enabled while hiding its scrollbar controls. */
+.blocklySvg > .blocklyScrollbarHorizontal,
+.blocklySvg > .blocklyScrollbarVertical,
+.blocklySvg > .blocklyBubbleCanvas > .blocklyScrollbarBackground {
+  visibility: hidden;
+}
 .blocklyScrollbarHandle {
   fill-opacity: 0.55;
 }
