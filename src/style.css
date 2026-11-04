@@ -701,3 +701,56 @@ dialog p {
   color: #b66562;
   white-space: pre-wrap;
 }
+
+/* Dark interface */
+:root {
+  color-scheme: dark;
+  color: #e6e3ed;
+  background: #191a23;
+  --border: #393a48;
+  --muted: #aaa6b7;
+  --purple: #a38cdd;
+}
+button {
+  background: #30313e;
+  border-color: #494957;
+  color: #e4e0ec;
+}
+button:hover { background: #403b50; border-color: #786b92; }
+.quiet, .icon-button { background: transparent; }
+.quiet:hover { background: #393545; }
+.app-header, .panel-toolbar { background: #22232e; }
+.brand-light, .game-label, .eyebrow, .edit-mark { color: #aaa5b6; }
+.brand-icon { background: #7660b7; }
+.version { background: #383244; border-color: #50445f; color: #c7b6e1; }
+.project-name-row input { color: #f1edf7; }
+.project-name-row input:hover { border-color: #60586e; }
+.save-state { color: #a9b9aa; }
+.save-error { color: #f1b17e; }
+.studio { background: #22232e; border-color: #393a48; box-shadow: none; }
+.pill { color: #c1bacd; background: #363442; }
+.icon-button { color: #b9b2c2; }
+.code-panel { background: #22232e; }
+.code-file, .code, .code-actions { background: #1e1f29; }
+.code-file { color: #aaa2b8; }
+.code-line:hover { background: #353042; }
+.line-number { color: #898393; }
+.code-line code { color: #d3c1f4; }
+.code-line .code-comment, .code-placeholder { color: #aaa3b3; }
+.code-actions { border-color: var(--border); }
+.primary { background: #7660b7; border-color: #7660b7; color: #fff; }
+.primary:hover { background: #8971ca; border-color: #8971ca; }
+.valid { color: #8bc6a4; }
+.invalid, #import-error { color: #ed9e99; }
+.warning { color: #e2be7d; }
+.validation-note { color: #aaa3b3; }
+.issue { background: #49302f; color: #f0b0a8; }
+.issue.warning { background: #443b2a; color: #e7c98c; }
+.issue:hover { background: #59403d; }
+.issue.warning:hover { background: #544a32; }
+footer { color: #aaa3b3; }
+dialog { background: #282934; color: #ece8f2; box-shadow: 0 20px 90px #0009; }
+dialog::backdrop { background: #090910aa; }
+dialog p, .example-list small { color: #b9b0c2; }
+.example-icon { background: #40384d; color: #c3acdF; }
+#import-source { color: #e6e3ed; background: #1e1f29; }

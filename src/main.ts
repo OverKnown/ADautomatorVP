@@ -37,7 +37,7 @@ const workspace = Blockly.inject("blockly", {
   sounds: false,
   trashcan: true,
   maxBlocks: 500,
-  grid: { spacing: 24, length: 2, colour: "#d9d7e0", snap: false },
+  grid: { spacing: 24, length: 2, colour: "#41414f", snap: false },
   zoom: {
     controls: true,
     wheel: true,
