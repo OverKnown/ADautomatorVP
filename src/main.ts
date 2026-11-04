@@ -235,7 +235,6 @@ el("redo").addEventListener("click", () => {
   workspace.undo(true);
   update();
 });
-el("fit").addEventListener("click", () => workspace.zoomToFit());
 el("check").addEventListener("click", () => {
   update();
   const issue = result.issues[0];

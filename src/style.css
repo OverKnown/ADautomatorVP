@@ -278,20 +278,6 @@ main {
   width: 100%;
   overflow: hidden;
 }
-.workspace-bottom {
-  height: 36px;
-  min-height: 36px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 0 17px;
-  font-size: 10px;
-  color: #8d8899;
-}
-.workspace-bottom button {
-  font-size: 10px;
-}
 .code-panel {
   display: flex;
   flex-direction: column;
@@ -667,10 +653,6 @@ dialog p {
     gap: 20px;
     height: 65px;
     font-size: 9px;
-  }
-  .workspace-bottom {
-    font-size: 9px;
-    padding: 0 10px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
