@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
+    />
     <meta name="theme-color" content="#f7f7f5" />
     <meta
       name="description"
@@ -12,7 +15,7 @@
     <title>Automator Studio · Antimatter Dimensions</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   </head>
-  <body>
+  <body data-mobile-view="blocks">
     <header class="app-header">
       <div class="brand-group">
         <a class="brand" href="./" aria-label="Automator Studio"
@@ -30,7 +33,7 @@
         aria-label="Project"
         data-i18n-aria-label="Project"
       >
-        <div>
+        <div class="project-info">
           <div class="project-name-row">
             <input
               id="project-name"
@@ -46,7 +49,15 @@
             >
           </p>
         </div>
-        <div class="project-actions">
+        <button
+          id="project-menu-toggle"
+          class="mobile-only"
+          aria-expanded="false"
+          aria-controls="project-actions"
+        >
+          <span data-i18n="Project ⌄">Project ⌄</span>
+        </button>
+        <div class="project-actions" id="project-actions">
           <select
             id="language"
             aria-label="Language"
@@ -73,9 +84,28 @@
       </section>
     </header>
     <main>
+      <nav class="mobile-switcher" aria-label="Editor view" data-i18n-aria-label="Editor view">
+        <button
+          id="show-blocks"
+          aria-pressed="true"
+          aria-controls="workspace-panel"
+        >
+          <span data-i18n="Blocks">Blocks</span>
+        </button>
+        <button id="show-code" aria-pressed="false" aria-controls="code-panel">
+          <span data-i18n="Code">Code</span> <span id="mobile-issues" class="mobile-issues" hidden></span>
+        </button>
+      </nav>
       <section class="studio" aria-label="Editor" data-i18n-aria-label="Editor">
-        <div class="workspace-panel">
+        <div class="workspace-panel" id="workspace-panel">
           <div class="panel-toolbar">
+            <button
+              id="add-block"
+              class="mobile-only add-block"
+              aria-haspopup="dialog"
+            >
+              <span data-i18n="＋ Block">＋ Block</span>
+            </button>
             <div class="panel-title">
               <span class="status-dot"></span>
               <span data-i18n="Editor">Editor</span>
@@ -116,7 +146,7 @@
           ></div>
         </div>
         <aside
-          class="code-panel"
+          class="code-panel" id="code-panel"
           aria-label="Generated code"
           data-i18n-aria-label="Generated code"
         >
@@ -184,6 +214,14 @@
       </footer>
     </main>
     <div id="toast" role="status" class="toast" hidden></div>
+    <dialog id="blocks-dialog" aria-labelledby="blocks-dialog-title">
+      <div class="dialog-head">
+        <h2 id="blocks-dialog-title" data-i18n="Add block">Add block</h2>
+        <button data-close aria-label="Close" data-i18n-aria-label="Close">✕</button>
+      </div>
+      <p data-i18n="Tap a command to append it to the script. To nest it in a condition or loop, drag the block in the editor.">Tap a command to append it to the script. To nest it in a condition or loop, drag the block in the editor.</p>
+      <div id="mobile-catalog" class="mobile-catalog"></div>
+    </dialog>
     <dialog id="examples-dialog">
       <div class="dialog-head">
         <div>

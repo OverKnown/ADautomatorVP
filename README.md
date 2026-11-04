@@ -61,6 +61,8 @@ Autosave is specific to this site's URL and your browser. Clearing site data del
 
 The workspace is limited to 500 blocks. JSON files are limited to 2 MB and 80 levels of nested conditions. Project files and contents are not sent to a server. Fonts and graphical assets are bundled; no third-party CDNs are required. This is not a PWA: reloading the site offline is not guaranteed to work.
 
+On phones, **Blocks / Code** switches between the editor and script. **＋ Block** opens a catalog; tap a command to append it to the script. Drag blocks to nest them in conditions or loops. File actions and the language selector are available in **Project**. Tap a code line or issue to reveal its block.
+
 ## Compatibility and validation limits
 
 Syntax was checked against the game's [automator-commands.js](https://github.com/IvarK/AntimatterDimensionsSourceCode/blob/master/src/core/automator/automator-commands.js) and [lexer.js](https://github.com/IvarK/AntimatterDimensionsSourceCode/blob/master/src/core/automator/lexer.js) on November 4, 2026.

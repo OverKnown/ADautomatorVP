@@ -22,6 +22,7 @@ import {
   type Project,
 } from "./project";
 import "./style.css";
+import { mobileLayout, setupMobileUI } from "./mobile";
 
 const el = <T extends HTMLElement = HTMLElement>(id: string) =>
   document.getElementById(id) as T;
@@ -40,8 +41,9 @@ const workspace = Blockly.inject("blockly", {
   grid: { spacing: 24, length: 2, colour: "#41414f", snap: false },
   zoom: {
     controls: true,
+    pinch: true,
     wheel: true,
-    startScale: 0.85,
+    startScale: mobileLayout.matches ? 0.75 : 0.85,
     maxScale: 1.5,
     minScale: 0.35,
     scaleSpeed: 1.1,
@@ -62,6 +64,7 @@ function toast(message: string) {
     node.hidden = true;
   }, 5000);
 }
+const mobileUI = setupMobileUI(workspace, toast);
 function project() {
   return makeProject(nameInput.value.trim() || t("New script"), workspace);
 }
@@ -86,6 +89,7 @@ function scheduleSave() {
   saveTimer = setTimeout(saveLocal, 400);
 }
 function loadProject(data: Project, persist = true) {
+  mobileUI.showBlocks();
   loading = true;
   Blockly.Events.disable();
   try {
@@ -104,7 +108,8 @@ function loadProject(data: Project, persist = true) {
     loading = false;
   }
   update();
-  workspace.scrollCenter();
+  const start = workspace.getBlocksByType("start", false)[0];
+  if (!start || !mobileUI.focusBlock(start.id)) workspace.scrollCenter();
   if (persist) {
     saveBlocked = false;
     saveLocal();
@@ -113,7 +118,7 @@ function loadProject(data: Project, persist = true) {
 function focusBlock(id: string) {
   const block = workspace.getBlockById(id);
   if (!block) return;
-  workspace.centerOnBlock(id);
+  if (!mobileUI.focusBlock(id)) workspace.centerOnBlock(id);
   workspace.highlightBlock(id);
   setTimeout(() => workspace.highlightBlock(null), 1800);
 }
@@ -121,6 +126,7 @@ function update() {
   result = compileWorkspace(workspace);
   const errors = result.issues.filter((i) => i.severity === "error");
   const warnings = result.issues.filter((i) => i.severity === "warning");
+  mobileUI.updateIssues(result.issues.length);
   el("block-count").textContent = t("{count} blocks", {
     count: Math.max(0, workspace.getAllBlocks(false).length - 1),
   });
@@ -364,7 +370,9 @@ window.addEventListener("storage", (event) => {
   setSaveState("Project changed in another tab — save JSON and reload", true);
   toast(t("Autosave paused to avoid overwriting changes from another tab."));
 });
-new ResizeObserver(() => Blockly.svgResize(workspace)).observe(el("blockly"));
+new ResizeObserver(() => {
+  if (el("blockly").clientWidth) Blockly.svgResize(workspace);
+}).observe(el("blockly"));
 try {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) loadProject(parseProject(saved));
@@ -390,6 +398,7 @@ languageSelect.addEventListener("change", () => {
   relocalizeWorkspace(workspace);
   workspace.updateToolbox(createToolbox());
   translatePage();
+  mobileUI.refresh();
   el("toast").hidden = true;
   clearTimeout(toastTimer);
   update();
