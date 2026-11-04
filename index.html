@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f7f5" />
+    <meta
+      name="description"
+      content="Визуальный конструктор скриптов Automator для Antimatter Dimensions. Блоки, проверка и сохранение проектов на устройстве."
+    />
+    <title>Automator Studio · Antimatter Dimensions</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  </head>
+  <body>
+    <header class="app-header">
+      <a class="brand" href="./" aria-label="Automator Studio"
+        ><span class="brand-icon">a<span>∞</span></span
+        ><span>automator<span class="brand-light"> / studio</span></span></a
+      >
+      <span class="game-label"
+        >ANTIMATTER DIMENSIONS <span class="version">v0.1</span></span
+      >
+      <button id="help" class="quiet">
+        Как это работает <span aria-hidden="true">↗</span>
+      </button>
+    </header>
+    <main>
+      <section class="project-bar" aria-label="Проект">
+        <div>
+          <div class="eyebrow">ВИЗУАЛЬНЫЙ РЕДАКТОР СКРИПТОВ</div>
+          <div class="project-name-row">
+            <input
+              id="project-name"
+              maxlength="100"
+              aria-label="Название проекта"
+              value="Первый Eternity"
+            /><span class="edit-mark" aria-hidden="true">✎</span>
+          </div>
+          <p class="save-state" id="save-state" role="status">
+            Хранится в этом браузере
+          </p>
+        </div>
+        <div class="project-actions">
+          <button id="new-project" class="quiet">＋ Новый</button
+          ><button id="open-project">Открыть JSON</button
+          ><button id="save-project">↓ Сохранить проект</button
+          ><input
+            type="file"
+            id="file-input"
+            accept=".json,application/json"
+            hidden
+          />
+        </div>
+      </section>
+      <section class="studio" aria-label="Конструктор">
+        <div class="workspace-panel">
+          <div class="panel-toolbar">
+            <div class="panel-title">
+              <span class="status-dot"></span> Конструктор
+              <span class="pill" id="block-count">0 блоков</span>
+            </div>
+            <div class="toolbar-actions">
+              <button
+                id="undo"
+                class="icon-button"
+                title="Отменить (Ctrl+Z)"
+                aria-label="Отменить"
+              >
+                ↶</button
+              ><button
+                id="redo"
+                class="icon-button"
+                title="Повторить (Ctrl+Shift+Z)"
+                aria-label="Повторить"
+              >
+                ↷</button
+              ><span class="toolbar-separator"></span
+              ><button id="examples" class="quiet">
+                Примеры <span aria-hidden="true">⌄</span>
+              </button>
+            </div>
+          </div>
+          <div class="workspace-hint">
+            <span>01 <b>Выбери блок</b></span
+            ><span>02 <b>Соедини команды</b></span
+            ><span>03 <b>Скопируй код в игру</b></span>
+          </div>
+          <div id="blockly" aria-label="Рабочая область блоков"></div>
+          <div class="workspace-bottom">
+            <span>Перетащи блок из категории в цепочку</span
+            ><button id="fit" class="quiet">⌖ Показать всё</button>
+          </div>
+        </div>
+        <aside class="code-panel" aria-label="Сгенерированный код">
+          <div class="panel-toolbar">
+            <span class="panel-title"
+              ><span class="code-symbol">&lt;/&gt;</span> Код Automator</span
+            ><span class="live-label">LIVE</span>
+          </div>
+          <div class="code-file">
+            <span>script.txt</span><span id="line-count">0 строк</span>
+          </div>
+          <div
+            id="code"
+            class="code"
+            tabindex="0"
+            aria-label="Текст скрипта"
+          ></div>
+          <div class="code-actions">
+            <button id="copy" class="primary">
+              Копировать код <span aria-hidden="true">⧉</span></button
+            ><button
+              id="download-code"
+              title="Скачать script.txt"
+              aria-label="Скачать текст скрипта"
+            >
+              ↓ .txt
+            </button>
+          </div>
+          <div class="validation">
+            <div class="validation-heading">
+              <span id="validation-status">Проверка</span
+              ><button id="check" class="quiet">Проверить ↻</button>
+            </div>
+            <div id="issues" aria-live="polite"></div>
+            <p class="validation-note">
+              Проверяем структуру и параметры блоков. Доступность команд и
+              исследований зависит от сохранения в игре.
+            </p>
+          </div>
+          <div class="local-note">
+            <span aria-hidden="true">◈</span>
+            <div>
+              <strong>Твой скрипт — на твоём устройстве</strong>
+              <p>
+                Автосохранение в браузере. Скачивай JSON, чтобы сохранить копию
+                или перенести проект.
+              </p>
+            </div>
+          </div>
+        </aside>
+      </section>
+      <footer>
+        <span>Сначала блоки. Потом бесконечность.</span
+        ><a
+          href="https://ivark.github.io/AntimatterDimensions/"
+          target="_blank"
+          rel="noreferrer"
+          >Открыть Antimatter Dimensions ↗</a
+        >
+      </footer>
+    </main>
+    <div id="toast" role="status" class="toast" hidden></div>
+    <dialog id="examples-dialog">
+      <div class="dialog-head">
+        <div>
+          <span class="eyebrow">БЫСТРЫЙ СТАРТ</span>
+          <h2>Начни с примера</h2>
+        </div>
+        <button data-close aria-label="Закрыть">✕</button>
+      </div>
+      <p>
+        Учебные сценарии. Подстрой пороги под своё сохранение. Текущий проект
+        можно будет заменить после подтверждения.
+      </p>
+      <div class="example-list">
+        <button data-example="starter">
+          <span class="example-icon">↗</span
+          ><span
+            ><strong>Первый Eternity</strong
+            ><small>Автосброс → ожидание → Eternity</small></span
+          ><span>→</span></button
+        ><button data-example="loop">
+          <span class="example-icon">↻</span
+          ><span
+            ><strong>Цикл Eternity</strong
+            ><small>Повторение команд до достижения цели</small></span
+          ><span>→</span></button
+        ><button data-example="dilation">
+          <span class="example-icon">◇</span
+          ><span
+            ><strong>Запуск Dilation</strong
+            ><small>Пресет исследований → Dilation → награда</small></span
+          ><span>→</span>
+        </button>
+      </div>
+    </dialog>
+    <dialog id="help-dialog">
+      <div class="dialog-head">
+        <h2>От блоков к Automator</h2>
+        <button data-close aria-label="Закрыть">✕</button>
+      </div>
+      <ol class="help-steps">
+        <li>
+          Открой категорию слева и перетащи команду под блок «Начало скрипта».
+          Все команды должны быть соединены.
+        </li>
+        <li>
+          Измени параметры прямо на блоках. В условия и циклы можно вкладывать
+          другие команды. Правой кнопкой можно дублировать или удалить блок.
+        </li>
+        <li>
+          Исправь ошибки справа. Нажатие на сообщение показывает проблемный
+          блок. «Свой код» вставляет одну непроверенную строку.
+        </li>
+        <li>
+          Нажми «Копировать код», открой Automator в игре, переключись в
+          текстовый редактор и вставь код. Конструктор не запускает игру и не
+          читает её сохранение.
+        </li>
+        <li>
+          Сохрани JSON проекта для резервной копии. TXT содержит только код для
+          игры и не импортируется обратно в блоки.
+        </li>
+      </ol>
+      <p class="help-note">
+        Automator и часть команд открываются по мере прохождения. Очистка данных
+        сайта удалит автосохранение. Проекты между устройствами не
+        синхронизируются.
+      </p>
+      <a
+        href="https://github.com/IvarK/AntimatterDimensionsSourceCode/tree/master/src/core/automator"
+        target="_blank"
+        rel="noreferrer"
+        >Синтаксис: исходный код Automator ↗</a
+      >
+    </dialog>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
