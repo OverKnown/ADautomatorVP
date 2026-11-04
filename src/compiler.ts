@@ -1,3 +1,4 @@
+import { t } from "./i18n";
 export const currencies = [
   "AM",
   "IP",
@@ -83,13 +84,13 @@ export function compile(commands: Command[]): Compilation {
     };
     const enumValue = (key: string, allowed: readonly string[]) => {
       const value = f[key] ?? "";
-      if (!allowed.includes(value)) issue(`Недопустимое значение: ${key}.`);
+      if (!allowed.includes(value)) issue(t("Invalid value: {key}.", { key }));
       return value;
     };
     const numeric = (key: string) => {
       const value = (f[key] ?? "").trim();
       if (!validNumber(value))
-        issue("Укажите неотрицательное число, например 100 или 1e1000.");
+        issue(t("Enter a non-negative number, such as 100 or 1e1000."));
       return value;
     };
     const condition = () =>
@@ -106,16 +107,19 @@ export function compile(commands: Command[]): Compilation {
       case "until":
         emit(`${node.type.toUpperCase()} ${condition()} {`);
         if (!node.children?.length)
-          issue("Добавьте хотя бы одну команду внутрь условия или цикла.");
+          issue(t("Add at least one command inside the condition or loop."));
         node.children?.forEach((child) => visit(child, depth + 1));
         emit("}");
         break;
       case "auto":
       case "auto_amount": {
         const layer = enumValue("LAYER", ["INFINITY", "ETERNITY", "REALITY"]);
-        const mode = node.type === "auto_amount"
-          ? (f.SETTING === undefined ? "AMOUNT" : enumValue("SETTING", ["AMOUNT", "TIME", "MULTIPLIER"]))
-          : enumValue("MODE", ["ON", "OFF", "AMOUNT"]);
+        const mode =
+          node.type === "auto_amount"
+            ? f.SETTING === undefined
+              ? "AMOUNT"
+              : enumValue("SETTING", ["AMOUNT", "TIME", "MULTIPLIER"])
+            : enumValue("MODE", ["ON", "OFF", "AMOUNT"]);
         const unit: Record<string, string> = {
           INFINITY: "IP",
           ETERNITY: "EP",
@@ -123,12 +127,21 @@ export function compile(commands: Command[]): Compilation {
         };
         if (mode === "TIME" || mode === "MULTIPLIER") {
           if (layer === "REALITY")
-            issue("Reality не поддерживает автосброс по времени или множителю.");
+            issue(
+              t(
+                "Reality does not support time or multiplier auto prestige modes.",
+              ),
+            );
           const value = numeric("VALUE");
           if (mode === "TIME") {
             const timeUnit = enumValue("UNIT", ["SEC", "MS", "MIN"]);
-            if (!Number.isFinite(Number(value) * ({ SEC: 1000, MS: 1, MIN: 60000 }[timeUnit] ?? 1)))
-              issue("Длительность автосброса слишком велика.");
+            if (
+              !Number.isFinite(
+                Number(value) *
+                  ({ SEC: 1000, MS: 1, MIN: 60000 }[timeUnit] ?? 1),
+              )
+            )
+              issue(t("The auto prestige duration is too large."));
             emit(`AUTO ${layer} ${value} ${timeUnit}`);
           } else emit(`AUTO ${layer} ${value} X HIGHEST`);
           break;
@@ -144,25 +157,23 @@ export function compile(commands: Command[]): Compilation {
         const milliseconds =
           Number(value) * ({ SEC: 1000, MS: 1, MIN: 60000 }[unit] ?? 1);
         if (!Number.isFinite(milliseconds))
-          issue("Длительность паузы слишком велика.");
+          issue(t("The pause duration is too large."));
         emit(`PAUSE ${value} ${unit}`);
         break;
       }
       case "prestige": {
         const layer = enumValue("LAYER", ["INFINITY", "ETERNITY", "REALITY"]);
         if (layer === "INFINITY" && f.RESPEC === "TRUE")
-          issue("У Infinity нет RESPEC. Отключите сброс исследований.");
+          issue(t("Infinity has no RESPEC. Disable study respec."));
         emit(`${layer}${nowait}${f.RESPEC === "TRUE" ? " RESPEC" : ""}`);
         break;
       }
       case "studies": {
         const value = (f.VALUE ?? "").trim();
         if (!/^\d+(\s*,\s*\d+)*$/.test(value))
-          issue(
-            "Перечислите номера исследований через запятую, например 11,21,31.",
-          );
+          issue(t("Enter comma-separated study IDs, such as 11,21,31."));
         else if (value.split(",").some((id) => !studyIds.has(Number(id))))
-          issue("В списке есть несуществующий номер Time Study.");
+          issue(t("The list contains an invalid Time Study ID."));
         emit(`STUDIES${nowait} PURCHASE ${value}`);
         break;
       }
@@ -200,16 +211,16 @@ export function compile(commands: Command[]): Compilation {
         const text = f.TEXT ?? "";
         if (/["\r\n]/.test(text))
           issue(
-            "В уведомлении нельзя использовать двойные кавычки или перенос строки.",
+            t("Notifications cannot contain double quotes or line breaks."),
           );
         emit(`NOTIFY "${text}"`);
         break;
       }
       case "raw":
         if (!(f.TEXT ?? "").trim())
-          issue("Введите текст команды в блоке «Свой код».");
+          issue(t("Enter a command in the “Custom code” block."));
         issue(
-          "«Свой код» не проверяется. Проверьте его в Automator игры.",
+          t("“Custom code” is unchecked. Validate it in the game’s Automator."),
           "warning",
         );
         (f.TEXT ?? "").split(/\r?\n/).forEach(emit);
@@ -218,7 +229,7 @@ export function compile(commands: Command[]): Compilation {
         emit("STOP");
         break;
       default:
-        issue("Неизвестная команда.");
+        issue(t("Unknown command."));
     }
   }
   commands.forEach((node) => visit(node, 0));

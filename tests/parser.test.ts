@@ -143,7 +143,7 @@ test("rejected script import cannot modify the open project", () => {
 test("limits apply before loading the live workspace; long sequential scripts are supported", () => {
   assert.equal(roundTrip(Array(150).fill("PAUSE 1 SEC").join("\n")).count, 150);
   assert.throws(() => parseScript(Array(500).fill("STOP").join("\n")), /499/);
-  assert.throws(() => parseScript(" ".repeat(2_000_001)), /2 МБ/);
+  assert.throws(() => parseScript(" ".repeat(2_000_001)), /2 MB/);
   assert.throws(() => parseScript("IF EP > 1 {\n".repeat(81)), /80/);
 });
 test("parser uses the shared compiler validation and retains exponent text", () => {
