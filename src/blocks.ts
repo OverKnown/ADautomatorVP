@@ -32,7 +32,21 @@ const checkbox = (name: string) => ({
   name,
   checked: false,
 });
-const layer = () => dropdown("LAYER", ["INFINITY", "ETERNITY", "REALITY"]);
+const layerColours = {
+  INFINITY: "#b67f33",
+  ETERNITY: "#b341e0",
+  REALITY: "#0ba00e",
+};
+type Layer = keyof typeof layerColours;
+const layer = () => dropdown("LAYER", Object.keys(layerColours));
+Blockly.Extensions.register("layer_colour", function () {
+  const field = this.getField("LAYER")!;
+  field.setValidator((value: string) => {
+    this.setColour(layerColours[value as Layer]);
+    return value;
+  });
+  this.setColour(layerColours[field.getValue() as Layer]);
+});
 const condition = () => [
   dropdown("RESOURCE", currencies),
   dropdown("OP", operators),
@@ -51,7 +65,7 @@ const definitions = [
     type: "wait",
     message0: "Ждать  %1 %2 %3",
     args0: condition(),
-    colour: "#8b6832",
+    colour: "#5d6c9c",
     tooltip: "Ждать, пока сравнение станет истинным. WAIT",
   },
   ...(["if", "while", "until"] as const).map((type, i) => ({
@@ -80,7 +94,8 @@ const definitions = [
     ],
     message1: "порог (для «по количеству») %1",
     args1: [text("VALUE", "1e10")],
-    colour: "#46766b",
+    colour: layerColours.INFINITY,
+    extensions: ["layer_colour"],
     tooltip:
       "AUTO. Ресурс порога зависит от слоя: IP, EP или RM. ON/OFF не меняет текущий порог.",
   },
@@ -95,7 +110,7 @@ const definitions = [
         ["мин", "MIN"],
       ]),
     ],
-    colour: "#8b6832",
+    colour: "#5d6c9c",
     tooltip: "Пауза по реальному времени. PAUSE",
   },
   {
@@ -104,7 +119,8 @@ const definitions = [
     args0: [layer()],
     message1: "не ждать %1  respec %2",
     args1: [checkbox("NOWAIT"), checkbox("RESPEC")],
-    colour: "#46766b",
+    colour: layerColours.INFINITY,
+    extensions: ["layer_colour"],
     tooltip:
       "По умолчанию ждёт доступности сброса. RESPEC: исследования для Eternity, глифы для Reality; недоступен для Infinity.",
   },
@@ -114,7 +130,7 @@ const definitions = [
     args0: [text("VALUE", "11,21,31")],
     message1: "не ждать %1",
     args1: [checkbox("NOWAIT")],
-    colour: "#716197",
+    colour: layerColours.ETERNITY,
     tooltip:
       "STUDIES PURCHASE. Номера через запятую; без NOWAIT ждёт покупки всех исследований.",
   },
@@ -124,7 +140,7 @@ const definitions = [
     args0: [dropdown("SLOT", ["1", "2", "3", "4", "5", "6"])],
     message1: "не ждать %1",
     args1: [checkbox("NOWAIT")],
-    colour: "#716197",
+    colour: layerColours.ETERNITY,
     tooltip:
       "STUDIES LOAD ID. Использует пресет, сохранённый в игре, а не в конструкторе.",
   },
@@ -132,7 +148,7 @@ const definitions = [
     type: "study_respec",
     message0: "Сбросить исследования при Eternity",
     args0: [],
-    colour: "#716197",
+    colour: layerColours.ETERNITY,
     tooltip:
       "STUDIES RESPEC: отмечает исследования для сброса при следующей Eternity.",
   },
@@ -146,7 +162,7 @@ const definitions = [
       ]),
       checkbox("NOWAIT"),
     ],
-    colour: "#716197",
+    colour: layerColours.ETERNITY,
     tooltip: "UNLOCK: купить открытие испытания или Dilation.",
   },
   {
@@ -158,14 +174,14 @@ const definitions = [
         Array.from({ length: 12 }, (_, i) => String(i + 1)),
       ),
     ],
-    colour: "#46766b",
+    colour: layerColours.ETERNITY,
     tooltip: "START EC. Испытание должно быть открыто.",
   },
   {
     type: "dilation",
     message0: "Начать Dilation",
     args0: [],
-    colour: "#46766b",
+    colour: layerColours.ETERNITY,
     tooltip: "START DILATION",
   },
   {
@@ -177,7 +193,7 @@ const definitions = [
         ["выключить", "OFF"],
       ]),
     ],
-    colour: "#46766b",
+    colour: layerColours.REALITY,
     tooltip: "BLACK HOLE ON/OFF. Требует открытия чёрной дыры в игре.",
   },
   {
@@ -240,24 +256,33 @@ const category = (name: string, colour: string, blocks: string[]) => ({
   colour,
   contents: blocks.map((type) => ({ kind: "block", type })),
 });
+const layerCategory = (name: string, layer: Layer, blocks: string[]) => ({
+  ...category(name, layerColours[layer], blocks),
+  contents: [
+    ...["auto", "prestige"].map((type) => ({
+      kind: "block",
+      type,
+      fields: { LAYER: layer },
+    })),
+    ...blocks.map((type) => ({ kind: "block", type })),
+  ],
+});
 export const toolbox = {
   kind: "categoryToolbox",
   contents: [
-    category("Ожидание", "#8b6832", ["wait", "pause"]),
-    category("Условия и циклы", "#5d6c9c", ["if", "while", "until"]),
-    category("Автоматизация", "#46766b", [
-      "auto",
-      "prestige",
-      "bh",
-      "start_ec",
-      "dilation",
+    category("Ожидание, условия и циклы", "#5d6c9c", [
+      "wait", "pause", "if", "while", "until",
     ]),
-    category("Исследования", "#716197", [
+    layerCategory("Infinity", "INFINITY", []),
+    layerCategory("Eternity", "ETERNITY", [
       "studies",
       "load",
       "study_respec",
       "unlock",
+      "start_ec",
+      "dilation",
     ]),
+    layerCategory("Reality", "REALITY", ["bh"]),
     category("Другое", "#747782", ["comment", "notify", "raw", "stop"]),
   ],
 };
