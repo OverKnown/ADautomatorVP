@@ -1,3 +1,5 @@
+[Открыть Automator Studio](https://overknown.github.io/ADautomatorVP/)
+
 # Automator Studio
 
 # !!! ENTIRELY VIBE-CODED !!!
