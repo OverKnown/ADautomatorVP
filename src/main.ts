@@ -37,6 +37,7 @@ const workspace = Blockly.inject("blockly", {
   media: `${import.meta.env.BASE_URL}blockly-media/`,
   sounds: false,
   trashcan: true,
+  maxTrashcanContents: 0,
   maxBlocks: 500,
   grid: { spacing: 24, length: 2, colour: "#41414f", snap: false },
   zoom: {

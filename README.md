@@ -53,7 +53,7 @@ If Pages has not been enabled or is restricted by repository settings, the build
 
 ## Working with projects
 
-Drag blocks from the categories into a single chain below “Script start”. Edit parameters directly in the blocks. Nest commands inside conditions and loops. Clicking a code line or an error shows the associated block.
+Drag blocks from the categories into a single chain below “Script start”. Edit parameters directly in the blocks. Nest commands inside conditions and loops. Delete a block by dragging it onto the trashcan or using its context menu. Clicking a code line or an error shows the associated block.
 
 **Save project** downloads a JSON file containing the blocks. **Open TXT / JSON** restores a JSON project or converts Automator text into blocks. **Paste code** lets you import text manually from the clipboard. You can edit TXT in the game and open it again: block positions are rebuilt. JSON remains the backup format that preserves block positions.
 
