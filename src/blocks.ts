@@ -39,6 +39,11 @@ const layerColours = {
 };
 type Layer = keyof typeof layerColours;
 const layer = () => dropdown("LAYER", Object.keys(layerColours));
+const autoSettings: [string, string][] = [
+  ["по количеству", "AMOUNT"],
+  ["через время", "TIME"],
+  ["× максимальной награды", "MULTIPLIER"],
+];
 Blockly.Extensions.register("layer_colour", function () {
   const field = this.getField("LAYER")!;
   const update = (value: string) => {
@@ -47,9 +52,21 @@ Blockly.Extensions.register("layer_colour", function () {
       this.getField("RESPEC")!.setVisible(value !== "INFINITY");
       this.getField("RESPEC_LABEL")!.setVisible(value !== "INFINITY");
     }
+    if (this.type === "auto_amount") {
+      const setting = this.getField("SETTING") as BlocklyTypes.FieldDropdown;
+      const previous = setting.getValue();
+      setting.setOptions(value === "REALITY" ? autoSettings.slice(0, 1) : autoSettings);
+      setting.setValue(value === "REALITY" ? "AMOUNT" : previous);
+      this.getField("UNIT")!.setVisible(setting.getValue() === "TIME");
+    }
     return value;
   };
   field.setValidator(update);
+  if (this.type === "auto_amount")
+    this.getField("SETTING")!.setValidator((value: string) => {
+      this.getField("UNIT")!.setVisible(value === "TIME");
+      return value;
+    });
   update(field.getValue());
 });
 const condition = () => [
@@ -103,12 +120,15 @@ const definitions = [
   },
   {
     type: "auto_amount",
-    message0: "Автосброс  %1  по количеству %2",
-    args0: [layer(), text("VALUE", "1e10")],
+    message0: "Автосброс  %1  %2 %3 %4",
+    args0: [
+      layer(), dropdown("SETTING", autoSettings), text("VALUE", "1e10"),
+      dropdown("UNIT", [["сек", "SEC"], ["мс", "MS"], ["мин", "MIN"]]),
+    ],
     colour: layerColours.INFINITY,
     extensions: ["layer_colour"],
     tooltip:
-      "AUTO по количеству. Ресурс порога зависит от слоя: IP, EP или RM.",
+      "AUTO: количество IP/EP/RM, время или множитель максимальной награды. Время и множитель доступны для Infinity и Eternity после игровых разблокировок.",
   },
   {
     type: "pause",

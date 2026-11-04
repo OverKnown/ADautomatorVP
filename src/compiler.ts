@@ -114,13 +114,25 @@ export function compile(commands: Command[]): Compilation {
       case "auto_amount": {
         const layer = enumValue("LAYER", ["INFINITY", "ETERNITY", "REALITY"]);
         const mode = node.type === "auto_amount"
-          ? "AMOUNT"
+          ? (f.SETTING === undefined ? "AMOUNT" : enumValue("SETTING", ["AMOUNT", "TIME", "MULTIPLIER"]))
           : enumValue("MODE", ["ON", "OFF", "AMOUNT"]);
         const unit: Record<string, string> = {
           INFINITY: "IP",
           ETERNITY: "EP",
           REALITY: "RM",
         };
+        if (mode === "TIME" || mode === "MULTIPLIER") {
+          if (layer === "REALITY")
+            issue("Reality не поддерживает автосброс по времени или множителю.");
+          const value = numeric("VALUE");
+          if (mode === "TIME") {
+            const timeUnit = enumValue("UNIT", ["SEC", "MS", "MIN"]);
+            if (!Number.isFinite(Number(value) * ({ SEC: 1000, MS: 1, MIN: 60000 }[timeUnit] ?? 1)))
+              issue("Длительность автосброса слишком велика.");
+            emit(`AUTO ${layer} ${value} ${timeUnit}`);
+          } else emit(`AUTO ${layer} ${value} X HIGHEST`);
+          break;
+        }
         emit(
           `AUTO ${layer} ${mode === "AMOUNT" ? `${numeric("VALUE")} ${unit[layer]}` : mode}`,
         );

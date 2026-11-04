@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import type * as BlocklyTypes from "blockly/core";
 import Blockly from "../src/blockly-runtime";
-import { compileWorkspace } from "../src/blocks";
+import { blockToCommand, compileWorkspace } from "../src/blocks";
 import { compile, validNumber, types, type Command } from "../src/compiler";
 import { example, makeProject, parseProject } from "../src/project";
 
@@ -128,6 +128,48 @@ test("dedicated amount blocks select the currency for each layer", () => {
   assert.deepEqual(result.issues, []);
   assert.ok(compile([command("auto_amount", { LAYER: "REALITY", VALUE: "bad" })])
     .issues.some((issue) => issue.severity === "error"));
+});
+test("advanced auto settings generate time and multiplier commands only for supported layers", () => {
+  for (const LAYER of ["INFINITY", "ETERNITY"]) {
+    for (const UNIT of ["SEC", "MS", "MIN"]) {
+      const result = compile([command("auto_amount", { LAYER, SETTING: "TIME", UNIT, VALUE: "30" })]);
+      assert.equal(result.code, `AUTO ${LAYER} 30 ${UNIT}`);
+      assert.deepEqual(result.issues, []);
+    }
+    const result = compile([command("auto_amount", { LAYER, SETTING: "MULTIPLIER", VALUE: "1e1000" })]);
+    assert.equal(result.code, `AUTO ${LAYER} 1e1000 X HIGHEST`);
+    assert.deepEqual(result.issues, []);
+  }
+  for (const SETTING of ["TIME", "MULTIPLIER"])
+    assert.ok(compile([command("auto_amount", { LAYER: "REALITY", SETTING, UNIT: "SEC", VALUE: "10" })])
+      .issues.some((issue) => issue.severity === "error"));
+});
+test("auto settings hide unsupported options and round-trip selected modes", () => {
+  const workspace = new Blockly.Workspace();
+  try {
+    const start = workspace.newBlock("start");
+    const block = workspace.newBlock("auto_amount");
+    start.nextConnection!.connect(block.previousConnection!);
+    assert.equal(block.getField("UNIT")!.isVisible(), false);
+    block.setFieldValue("ETERNITY", "LAYER");
+    block.setFieldValue("TIME", "SETTING");
+    block.setFieldValue("5", "VALUE");
+    block.setFieldValue("MIN", "UNIT");
+    assert.equal(block.getField("UNIT")!.isVisible(), true);
+    const parsed = parseProject(JSON.stringify(makeProject("Тест", workspace)));
+    Blockly.serialization.workspaces.load(parsed.workspace, workspace);
+    const restored = workspace.getAllBlocks(false).find(b => b.type === "auto_amount")!;
+    assert.equal(compileWorkspace(workspace).code, "AUTO ETERNITY 5 MIN");
+    assert.equal(restored.getField("UNIT")!.isVisible(), true);
+    restored.setFieldValue("MULTIPLIER", "SETTING");
+    assert.equal(restored.getField("UNIT")!.isVisible(), false);
+    restored.setFieldValue("REALITY", "LAYER");
+    assert.equal(restored.getFieldValue("SETTING"), "AMOUNT");
+    assert.deepEqual((restored.getField("SETTING") as BlocklyTypes.FieldDropdown).getOptions(false), [["по количеству", "AMOUNT"]]);
+    assert.equal(compile([blockToCommand(restored)]).code, "AUTO REALITY 5 RM");
+    restored.setFieldValue("INFINITY", "LAYER");
+    assert.equal((restored.getField("SETTING") as BlocklyTypes.FieldDropdown).getOptions(false).length, 3);
+  } finally { workspace.dispose(); }
 });
 test("old auto blocks import into compact blocks without changing code", () => {
   const data = example("empty") as any;
