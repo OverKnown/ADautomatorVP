@@ -1,6 +1,7 @@
 import type * as BlocklyTypes from "blockly/core";
 import Blockly from "./blockly-runtime";
-import { types } from "./compiler";
+import { types, type Command } from "./compiler";
+import { parseScript } from "./parser";
 
 export const STORAGE_KEY = "ad-automator-studio:project:v1";
 export interface Project {
@@ -254,4 +255,42 @@ export function example(key: string): Project {
       },
     },
   };
+}
+
+// The same Command tree is used by the text parser and the block compiler.
+export function commandsToProject(commands: Command[], name: string): Project {
+  function convert(node: Command): BlockState {
+    return {
+      type: node.type,
+      fields: node.fields,
+      ...(node.children?.length
+        ? { inputs: { BODY: { block: chain(node.children.map(convert)) } } }
+        : {}),
+    };
+  }
+  return parseProject(
+    JSON.stringify({
+      format: "ad-automator-studio",
+      version: 1,
+      name: name.trim().slice(0, 100) || "Импортированный скрипт",
+      workspace: {
+        blocks: {
+          languageVersion: 0,
+          blocks: [
+            {
+              ...chain([block("start"), ...commands.map(convert)]),
+              x: 45,
+              y: 40,
+            },
+          ],
+        },
+      },
+    }),
+  );
+}
+export function scriptToProject(
+  source: string,
+  name = "Импортированный скрипт",
+): Project {
+  return commandsToProject(parseScript(source), name);
 }

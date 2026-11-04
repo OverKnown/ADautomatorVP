@@ -4,6 +4,7 @@ import {
   example,
   makeProject,
   parseProject,
+  scriptToProject,
   STORAGE_KEY,
   type Project,
 } from "./project";
@@ -263,7 +264,10 @@ el<HTMLInputElement>("file-input").addEventListener("change", async (event) => {
   try {
     if (file.size > 2_000_000)
       throw new Error("Файл слишком большой: максимум 2 МБ.");
-    const parsed = parseProject(await file.text());
+    const source = await file.text();
+    const parsed = file.name.toLowerCase().endsWith(".json")
+      ? parseProject(source)
+      : scriptToProject(source, file.name.replace(/\.[^.]+$/, ""));
     if (confirmReplace()) {
       loadProject(parsed);
       toast("Проект открыт");
@@ -274,6 +278,26 @@ el<HTMLInputElement>("file-input").addEventListener("change", async (event) => {
     );
   } finally {
     input.value = "";
+  }
+});
+el("paste-code").addEventListener("click", () => {
+  el("import-error").textContent = "";
+  el<HTMLDialogElement>("import-dialog").showModal();
+  el<HTMLTextAreaElement>("import-source").focus();
+});
+el("import-submit").addEventListener("click", () => {
+  el("import-error").textContent = "";
+  try {
+    const parsed = scriptToProject(
+      el<HTMLTextAreaElement>("import-source").value,
+    );
+    if (!confirmReplace()) return;
+    loadProject(parsed);
+    el<HTMLDialogElement>("import-dialog").close();
+    toast("Код преобразован в блоки. Проверьте замечания под кодом.");
+  } catch (error) {
+    el("import-error").textContent =
+      error instanceof Error ? error.message : "Не удалось прочитать скрипт";
   }
 });
 el("examples").addEventListener("click", () =>

@@ -678,3 +678,26 @@ dialog p {
     transition: none !important;
   }
 }
+
+#import-source {
+  width: 100%;
+  resize: vertical;
+  min-height: 180px;
+  max-height: 50vh;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font:
+    12px/1.7 "IBM Plex Mono",
+    monospace;
+  color: #47404f;
+  background: #fbfafc;
+}
+#import-source:focus-visible {
+  outline: 3px solid #b9a7ee;
+}
+#import-error {
+  color: #b66562;
+  white-space: pre-wrap;
+}
