@@ -197,7 +197,7 @@ const russian = {
   "Could not open: {message}": "Не удалось открыть: {message}",
   "Visual Automator script builder for Antimatter Dimensions. Blocks, validation, and projects saved on your device.":
     "Визуальный конструктор скриптов Automator для Antimatter Dimensions. Блоки, проверка и сохранение проектов на устройстве.",
-  "VISUAL SCRIPT EDITOR": "ВИЗУАЛЬНЫЙ РЕДАКТОР СКРИПТОВ",
+  "VISUAL SCRIPT EDITOR FOR": "ВИЗУАЛЬНЫЙ РЕДАКТОР СКРИПТОВ ДЛЯ",
   Project: "Проект",
   "Project name": "Название проекта",
   "Stored in this browser": "Хранится в этом браузере",
